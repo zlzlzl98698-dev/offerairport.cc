@@ -1,0 +1,36 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const filtered = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{filtered.length > 0 && (
+  <aside class="bg-bg-surface border border-border-subtle rounded-2xl p-5" data-pagefind-ignore>
+    <h2 class="text-sm font-bold text-text-title uppercase tracking-wide mb-3">
+      文章目录
+    </h2>
+    <nav aria-label="文章目录">
+      <ul class="space-y-1.5 text-sm">
+        {filtered.map((h) => (
+          <li class={h.depth === 3 ? 'pl-3.5 border-l border-border-subtle' : ''}>
+            <a
+              href={`#${h.slug}`}
+              class="block py-0.5 text-text-body hover:text-brand-primary transition-colors leading-snug"
+            >
+              {h.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </aside>
+)}

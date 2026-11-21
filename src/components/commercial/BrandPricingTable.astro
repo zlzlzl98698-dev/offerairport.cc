@@ -1,0 +1,78 @@
+---
+import type { BrandPlan } from '../../data/brands/types';
+
+interface Props {
+  brandName: string;
+  plans: BrandPlan[];
+}
+
+const { brandName, plans } = Astro.props;
+
+const statusLabelMap: Record<BrandPlan['verifiedStatus'], string> = {
+  measured: '实测核实',
+  vendor: '品牌资料',
+  historical: '历史记录',
+  partial: '待补全',
+  untested: '未核实',
+};
+---
+
+<div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+  <div class="px-5 py-4 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+    <h3 class="text-base font-bold text-text-title">{brandName} · 套餐与计费周期明细</h3>
+    <span class="text-xs text-text-muted">
+      注：年付折算月均价不等于单月真实月付价格
+    </span>
+  </div>
+
+  {plans.length > 0 ? (
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-sm">
+        <thead>
+          <tr class="bg-bg-surface/60 border-b border-border-subtle text-xs text-text-muted uppercase">
+            <th class="py-3 px-4 font-semibold">套餐名称</th>
+            <th class="py-3 px-4 font-semibold">计费周期</th>
+            <th class="py-3 px-4 font-semibold">标价</th>
+            <th class="py-3 px-4 font-semibold">流量额度</th>
+            <th class="py-3 px-4 font-semibold">重置方式</th>
+            <th class="py-3 px-4 font-semibold">数据来源状态</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border-subtle">
+          {plans.map((plan) => (
+            <tr class="hover:bg-bg-surface/40">
+              <td class="py-3 px-4 font-medium text-text-title">
+                <div>{plan.name}</div>
+                {plan.note && <div class="text-xs text-text-muted mt-0.5">{plan.note}</div>}
+              </td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded-md bg-bg-surface border border-border-subtle text-xs text-text-title">
+                  {plan.billingCycle}
+                </span>
+              </td>
+              <td class="py-3 px-4 font-mono font-semibold text-text-title whitespace-nowrap">
+                ¥{plan.priceCny}
+                {plan.isMonthlyAmortized && plan.billingCycle === '年付' && (
+                  <span class="block text-[11px] font-normal text-amber-700">
+                    折合约 ¥{(plan.priceCny / 12).toFixed(2)}/月(年付)
+                  </span>
+                )}
+              </td>
+              <td class="py-3 px-4 text-text-body">{plan.trafficDisplay}</td>
+              <td class="py-3 px-4 text-text-muted whitespace-nowrap">{plan.trafficReset}</td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-700">
+                  {statusLabelMap[plan.verifiedStatus]}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <div class="p-6 text-sm text-text-muted">
+      当前资料不足以列出该品牌完整套餐表（待核实状态），购买前请前往官网确认最新套餐与价格。
+    </div>
+  )}
+</div>

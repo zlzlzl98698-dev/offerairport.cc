@@ -1,0 +1,84 @@
+---
+import { MAIN_NAVIGATION } from '../../data/navigation';
+import { ALL_BRANDS } from '../../data/brands';
+import { SITE_CONFIG } from '../../data/site';
+---
+
+<footer class="bg-bg-surface border-t border-border-subtle mt-16" data-pagefind-ignore>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+      <!-- Brand Bio -->
+      <div class="lg:col-span-2 space-y-3">
+        <a href="/" class="inline-flex items-center gap-2 font-bold text-lg text-text-title">
+          <img
+            src="/images/site-avatar.webp"
+            alt={`${SITE_CONFIG.name} 头像`}
+            width="32"
+            height="32"
+            loading="lazy"
+            class="w-8 h-8 rounded-lg object-cover border border-border-subtle shrink-0"
+          />
+          <span>{SITE_CONFIG.name}</span>
+        </a>
+        <p class="text-sm text-text-body leading-relaxed max-w-md">
+          面向中文用户的原创网络工具技术博客与独立评测数据库。坚持「教程归教程、评测看证据、商业做披露」的单站三分区准则。
+        </p>
+        <p class="text-xs text-text-muted leading-relaxed max-w-md">
+          {SITE_CONFIG.affiliateDisclosureText}
+        </p>
+      </div>
+
+      <!-- 4 Primary Topics -->
+      <div>
+        <h3 class="text-sm font-semibold text-text-title mb-3">核心导航专题</h3>
+        <ul class="space-y-2 text-sm text-text-body">
+          {MAIN_NAVIGATION.map((hub) => (
+            <li>
+              <a href={hub.href} class="hover:text-brand-primary transition-colors">
+                {hub.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Evaluation & Database -->
+      <div>
+        <h3 class="text-sm font-semibold text-text-title mb-3">评测与品牌库</h3>
+        <ul class="space-y-2 text-sm text-text-body">
+          <li><a href="/brands/" class="hover:text-brand-primary transition-colors">{ALL_BRANDS.length} 家品牌数据库</a></li>
+          <li><a href="/reviews/" class="hover:text-brand-primary transition-colors">独立深度评测</a></li>
+          <li><a href="/comparisons/" class="hover:text-brand-primary transition-colors">多品牌横向对比</a></li>
+          <li><a href="/offers/" class="hover:text-brand-primary transition-colors">套餐与优惠汇总</a></li>
+          <li><a href="/brands/guangsuyun/" class="hover:text-brand-primary transition-colors">光速云品牌档案</a></li>
+        </ul>
+      </div>
+
+      <!-- Tutorials & Search -->
+      <div>
+        <h3 class="text-sm font-semibold text-text-title mb-3">实用工具与入口</h3>
+        <ul class="space-y-2 text-sm text-text-body">
+          <li><a href="/clash/verge-complete-guide/" class="hover:text-brand-primary transition-colors">Clash Verge Rev 指南</a></li>
+          <li><a href="/clash/verge-official-download-guide/" class="hover:text-brand-primary transition-colors">官方安全下载指南</a></li>
+          <li><a href="/clash/fix-node-timeout-errors/" class="hover:text-brand-primary transition-colors">节点超时故障排查</a></li>
+          <li><a href="/resources/risk-alerts/" class="hover:text-brand-primary transition-colors">跑路预警情报</a></li>
+          <li><a href="/search/" class="hover:text-brand-primary transition-colors">全站中文搜索</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-10 pt-6 border-t border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-text-muted">
+      <p>
+        © 2026 {SITE_CONFIG.name} (offerairport.cc) · 静态部署于 Cloudflare Pages · 最近核实：{SITE_CONFIG.lastUpdated}
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="/about/" class="hover:text-brand-primary">关于与编辑原则</a>
+        <a href="/methodology/" class="hover:text-brand-primary">评测方法论</a>
+        <a href="/disclaimer/" class="hover:text-brand-primary">免责与隐私披露</a>
+        <a href="/sitemap-index.xml" class="hover:text-brand-primary">Sitemap</a>
+        <a href="/robots.txt" class="hover:text-brand-primary">Robots.txt</a>
+        <a href="/search/" class="hover:text-brand-primary">站内搜索</a>
+      </div>
+    </div>
+  </div>
+</footer>

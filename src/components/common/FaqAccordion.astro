@@ -1,0 +1,30 @@
+---
+import { renderInlineMarkdownHtml, type FAQItem } from '../../utils/seo';
+
+interface Props {
+  title: string;
+  faqs: FAQItem[];
+  headingId?: string;
+}
+
+const { title, faqs, headingId } = Astro.props;
+---
+
+{faqs.length > 0 && (
+  <section class="mt-10 pt-8 border-t border-border-subtle" aria-labelledby={headingId}>
+    <h2 id={headingId} class="text-xl font-bold text-text-title mb-4">{title}</h2>
+    <div class="space-y-3">
+      {faqs.map((faq) => (
+        <details class="group rounded-2xl border border-border-subtle bg-bg-surface p-4">
+          <summary class="font-semibold text-text-title cursor-pointer flex items-center justify-between gap-2 list-none">
+            <span set:html={renderInlineMarkdownHtml(faq.question)} />
+            <svg class="w-4 h-4 text-text-muted shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </summary>
+          <p class="mt-3 text-sm text-text-body leading-relaxed" set:html={renderInlineMarkdownHtml(faq.answer)} />
+        </details>
+      ))}
+    </div>
+  </section>
+)}

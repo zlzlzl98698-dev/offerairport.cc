@@ -1,0 +1,250 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/common/Breadcrumbs.astro';
+import AffiliateDisclosure from '../components/commercial/AffiliateDisclosure.astro';
+import RegistrationButton from '../components/commercial/RegistrationButton.astro';
+import BrandPricingTable from '../components/commercial/BrandPricingTable.astro';
+import BrandInfrastructureSnapshot from '../components/charts/BrandInfrastructureSnapshot.astro';
+import NetworkPerformanceReport from '../components/charts/NetworkPerformanceReport.astro';
+import StreamingAvailabilityMatrix from '../components/charts/StreamingAvailabilityMatrix.astro';
+import NetworkTopology from '../components/charts/NetworkTopology.astro';
+import FaqAccordion from '../components/common/FaqAccordion.astro';
+import type { BrandRecord } from '../data/brands/types';
+import { SITE_CONFIG } from '../data/site';
+import { buildBreadcrumbSchema, buildCanonicalUrl, buildFaqSchema, type BreadcrumbItem } from '../utils/seo';
+import { buildBrandFaqs } from '../utils/brand-seo';
+
+interface Props {
+  brand: BrandRecord;
+  title?: string;
+  description?: string;
+  breadcrumbs: BreadcrumbItem[];
+}
+
+const {
+  brand,
+  title = `${brand.name}（${brand.englishName}）套餐价格、线路规格与官网入口`,
+  description = `${brand.name} 商业资料与套餐档案：${brand.summary} 查看详细价格周期、支持客户端、风险提示与核实日期（${brand.verifiedAt}）。`,
+  breadcrumbs,
+} = Astro.props;
+
+const urlPath = `/brands/${brand.slug}/`;
+const canonical = buildCanonicalUrl(urlPath);
+const brandFaqs = buildBrandFaqs(brand);
+const planPrices = brand.plans.map((p) => p.priceCny).filter((n) => n > 0);
+
+const schemas: object[] = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: title,
+    description,
+    url: canonical,
+    inLanguage: 'zh-CN',
+    dateModified: brand.updatedAt,
+    mainEntity: {
+      '@type': 'Service',
+      name: `${brand.name}（${brand.englishName}）跨境代理订阅档案`,
+      serviceType: brand.lineType,
+      brand: {
+        '@type': 'Brand',
+        name: brand.name,
+        alternateName: brand.englishName,
+      },
+      ...(planPrices.length > 0
+        ? {
+            offers: {
+              '@type': 'AggregateOffer',
+              priceCurrency: 'CNY',
+              lowPrice: Math.min(...planPrices),
+              highPrice: Math.max(...planPrices),
+              offerCount: brand.plans.length,
+            },
+          }
+        : {}),
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.domain,
+    },
+  },
+  buildFaqSchema(brandFaqs),
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={urlPath}
+  ogImage={brand.cover || '/images/og-cover.png'}
+  structuredData={schemas}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+
+    <!-- Brand Hero Header -->
+    <section class="rounded-3xl border border-border-subtle bg-white p-6 sm:p-8 shadow-sm mb-8">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="flex items-start gap-4">
+          {brand.logo ? (
+            <img
+              src={brand.logo}
+              alt={`${brand.name} 官方图标`}
+              width="72"
+              height="72"
+              class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain bg-bg-surface border border-border-subtle p-1.5 shrink-0"
+            />
+          ) : (
+            <div
+              class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shrink-0"
+              style={`background-color: ${brand.accentColor}`}
+            >
+              {brand.name.slice(0, 2)}
+            </div>
+          )}
+
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-300 font-medium">
+                品牌与套餐档案
+              </span>
+              {brand.isPrimaryPartner && (
+                <span class="px-2.5 py-0.5 rounded-full bg-brand-soft text-brand-primary border border-blue-200 font-medium">
+                  重点合作推广品牌
+                </span>
+              )}
+              <span class="px-2.5 py-0.5 rounded-full bg-bg-surface text-text-muted border border-border-subtle font-mono">
+                核实日期：{brand.verifiedAt}
+              </span>
+            </div>
+
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-text-title">
+              {brand.name}（{brand.englishName}）套餐与品牌资料
+            </h1>
+            <p class="text-sm sm:text-base text-text-body max-w-2xl leading-relaxed">
+              {brand.summary}
+            </p>
+          </div>
+        </div>
+
+        <div class="lg:min-w-[300px] bg-bg-surface border border-border-subtle rounded-2xl p-5 space-y-3">
+          <div class="text-xs text-text-muted">参考入门门槛</div>
+          <div class="text-base font-bold text-text-title">{brand.startingMonthlyDisplay}</div>
+          <RegistrationButton brandSlug={brand.slug} />
+        </div>
+      </div>
+    </section>
+
+    <div class="mb-8">
+      <AffiliateDisclosure extraNote={SITE_CONFIG.vendorDataDisclaimer} />
+    </div>
+
+    <!-- Discrepancy / Historical Warning if present -->
+    {brand.discrepancyNotes && brand.discrepancyNotes.length > 0 && (
+      <section class="mb-8 rounded-2xl border border-amber-300 bg-amber-50 p-5 space-y-2">
+        <h2 class="text-sm font-bold text-amber-950">历史资料差异核对记录</h2>
+        <ul class="list-disc pl-5 text-sm text-amber-900 space-y-1">
+          {brand.discrepancyNotes.map((note) => <li>{note}</li>)}
+        </ul>
+      </section>
+    )}
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div class="lg:col-span-8 space-y-8">
+        <!-- Infrastructure Snapshot -->
+        <BrandInfrastructureSnapshot brand={brand} />
+
+        <!-- Plans & Pricing -->
+        <BrandPricingTable brandName={brand.name} plans={brand.plans} />
+
+        <!-- Speed & Streaming & Topology -->
+        <NetworkPerformanceReport brand={brand} />
+        <StreamingAvailabilityMatrix brand={brand} />
+        <NetworkTopology brand={brand} />
+
+        <!-- Slot for custom brand notes / Guangsuyun deep material -->
+        <div class="editorial-prose">
+          <slot />
+        </div>
+
+        <!-- Pros / Cons / Risks -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="rounded-2xl border border-border-subtle bg-white p-5">
+            <h2 class="text-base font-bold text-text-title mb-3">产品特点与优势</h2>
+            <ul class="list-disc pl-5 space-y-1.5 text-sm text-text-body">
+              {brand.pros.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+          <div class="rounded-2xl border border-border-subtle bg-white p-5">
+            <h2 class="text-base font-bold text-text-title mb-3">限制与购买前注意</h2>
+            <ul class="list-disc pl-5 space-y-1.5 text-sm text-text-body">
+              {brand.cons.map((item) => <li>{item}</li>)}
+              {brand.riskNotes.map((item) => <li class="text-amber-800">{item}</li>)}
+            </ul>
+          </div>
+        </section>
+
+        <FaqAccordion title={`${brand.name} 购前与使用 FAQ`} faqs={brandFaqs} />
+      </div>
+
+      <!-- Commercial Sidebar -->
+      <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-24" data-pagefind-ignore>
+        <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5 space-y-4">
+          <h2 class="text-base font-bold text-text-title">参数摘要与支持列表</h2>
+          <dl class="space-y-3 text-sm">
+            <div>
+              <dt class="text-xs text-text-muted">适合人群</dt>
+              <dd class="mt-1">
+                <ul class="list-disc pl-4 space-y-1 text-text-body">
+                  {brand.suitableFor.map((s) => <li>{s}</li>)}
+                </ul>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-text-muted">节点覆盖地区</dt>
+              <dd class="mt-1 flex flex-wrap gap-1.5">
+                {brand.nodeRegions.map((r) => (
+                  <span class="px-2 py-0.5 rounded-md bg-white border border-border-subtle text-xs text-text-body">
+                    {r}
+                  </span>
+                ))}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-text-muted">支持客户端</dt>
+              <dd class="mt-1 text-text-body">{brand.supportedClients.join(' · ')}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-text-muted">资料来源</dt>
+              <dd class="mt-1 text-xs text-text-muted">{brand.sources.join('；')}</dd>
+            </div>
+          </dl>
+
+          <div class="pt-4 border-t border-border-subtle">
+            <RegistrationButton brandSlug={brand.slug} />
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-border-subtle bg-white p-5 space-y-2.5 text-sm">
+          <h3 class="font-bold text-text-title">配置与评测延伸</h3>
+          {brand.reviewSlug && (
+            <a href={`/reviews/${brand.reviewSlug}/`} class="block text-brand-primary hover:underline">
+              → 阅读 {brand.name} 独立深度评测
+            </a>
+          )}
+          <a href="/clash/verge-subscription-import-guide/" class="block text-text-body hover:text-brand-primary">
+            → Clash Verge 订阅导入图文教程
+          </a>
+          <a href="/resources/airport-billing-faq/" class="block text-text-body hover:text-brand-primary">
+            → 看懂年付折算价与流量重置规则
+          </a>
+          <a href="/brands/" class="block text-text-body hover:text-brand-primary">
+            ← 返回品牌数据库
+          </a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

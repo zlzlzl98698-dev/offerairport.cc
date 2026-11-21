@@ -1,0 +1,62 @@
+---
+import { getBrandAffiliate } from '../../data/brands/links';
+
+interface Props {
+  brandSlug: string;
+  label?: string;
+  variant?: 'primary' | 'secondary';
+  showDisclosure?: boolean;
+}
+
+const {
+  brandSlug,
+  label,
+  variant = 'primary',
+  showDisclosure = true,
+} = Astro.props;
+
+const entry = getBrandAffiliate(brandSlug);
+---
+
+{entry ? (
+  <div class="space-y-2">
+    <div class="flex flex-wrap items-center gap-3">
+      <a
+        href={entry.registerUrl}
+        target="_blank"
+        rel="nofollow sponsored noopener"
+        class={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors ${
+          variant === 'primary'
+            ? 'bg-brand-primary text-white hover:bg-brand-primary-hover shadow-sm'
+            : 'bg-white text-text-title border border-border-subtle hover:border-brand-primary hover:text-brand-primary'
+        }`}
+      >
+        <span>{label || `前往 ${entry.name} 官网注册`}</span>
+        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5z" clip-rule="evenodd" />
+          <path fill-rule="evenodd" d="M6.194 12.753a.75.75 0 001.06.053L16.5 4.44v2.81a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.553l-9.056 8.194a.75.75 0 00-.053 1.06z" clip-rule="evenodd" />
+        </svg>
+      </a>
+
+      {entry.promoCode && (
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-surface border border-border-subtle text-xs text-text-title font-mono">
+          优惠码: <strong class="text-brand-primary">{entry.promoCode}</strong>
+        </span>
+      )}
+    </div>
+
+    {entry.promoDiscountNote && (
+      <p class="text-xs text-text-muted">{entry.promoDiscountNote}</p>
+    )}
+    {entry.linkAnomalyNote && (
+      <p class="text-xs text-amber-700 font-medium">链接提示：{entry.linkAnomalyNote}</p>
+    )}
+    {showDisclosure && (
+      <p class="text-[12px] text-text-muted">
+        含推广链接，通过链接注册可能为本站带来佣金，不影响用户支付价格。
+      </p>
+    )}
+  </div>
+) : (
+  <p class="text-xs text-text-muted">官方注册入口待核实</p>
+)}

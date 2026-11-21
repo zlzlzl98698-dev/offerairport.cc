@@ -1,0 +1,90 @@
+---
+import type { BrandRecord } from '../../data/brands/types';
+
+interface Props {
+  brand: BrandRecord;
+}
+
+const { brand } = Astro.props;
+
+const completenessBadge =
+  brand.dataCompleteness === 'full'
+    ? { text: '资料较完整', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+    : brand.dataCompleteness === 'historical'
+      ? { text: '历史存档', cls: 'bg-amber-50 text-amber-700 border-amber-200' }
+      : { text: '部分待核实', cls: 'bg-slate-100 text-slate-700 border-slate-200' };
+---
+
+<article class="card-elevated p-5 flex flex-col justify-between h-full">
+  <div>
+    <div class="flex items-start justify-between gap-3 mb-3">
+      <div class="flex items-center gap-3 min-w-0">
+        {brand.logo ? (
+          <img
+            src={brand.logo}
+            alt={`${brand.name} 品牌图标`}
+            width="44"
+            height="44"
+            loading="lazy"
+            class="w-11 h-11 rounded-xl object-contain bg-bg-surface border border-border-subtle p-1 shrink-0"
+          />
+        ) : (
+          <div
+            class="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-base shrink-0"
+            style={`background-color: ${brand.accentColor}`}
+          >
+            {brand.name.slice(0, 2)}
+          </div>
+        )}
+        <div class="min-w-0">
+          <h3 class="text-base font-bold text-text-title truncate">
+            <a href={`/brands/${brand.slug}/`} class="hover:text-brand-primary transition-colors">
+              {brand.name}
+            </a>
+          </h3>
+          <p class="text-xs text-text-muted truncate">{brand.englishName} {brand.sinceYear ? `· ${brand.sinceYear} 年运营` : ''}</p>
+        </div>
+      </div>
+
+      <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border shrink-0 ${completenessBadge.cls}`}>
+        {completenessBadge.text}
+      </span>
+    </div>
+
+    <p class="text-sm text-text-body leading-relaxed line-clamp-2 mb-3">
+      {brand.summary}
+    </p>
+
+    <div class="space-y-1.5 text-xs bg-bg-surface rounded-xl p-3 mb-4 border border-border-subtle">
+      <div class="flex justify-between gap-2">
+        <span class="text-text-muted">参考起步价</span>
+        <span class="font-semibold text-text-title text-right">{brand.startingMonthlyDisplay}</span>
+      </div>
+      <div class="flex justify-between gap-2">
+        <span class="text-text-muted">线路架构</span>
+        <span class="text-text-body text-right truncate max-w-[180px]">{brand.lineType}</span>
+      </div>
+      <div class="flex justify-between gap-2">
+        <span class="text-text-muted">接入方式</span>
+        <span class="text-text-body text-right">{brand.clientMode}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pt-3 border-t border-border-subtle flex items-center justify-between gap-2 text-xs">
+    <a
+      href={`/brands/${brand.slug}/`}
+      class="font-semibold text-brand-primary hover:underline"
+    >
+      查看套餐与档案 →
+    </a>
+    {brand.reviewSlug && (
+      <a
+        href={`/reviews/${brand.reviewSlug}/`}
+        class="text-text-muted hover:text-text-title"
+      >
+        独立评测
+      </a>
+    )}
+  </div>
+</article>

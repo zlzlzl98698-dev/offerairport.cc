@@ -1,0 +1,692 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import TableOfContents from '../../components/common/TableOfContents.astro';
+import ArticleCard from '../../components/cards/ArticleCard.astro';
+import { getNavHub } from '../../data/navigation';
+import { getAllPublishedContent } from '../../utils/content';
+import { SITE_CONFIG } from '../../data/site';
+import { buildBreadcrumbSchema, buildCanonicalUrl } from '../../utils/seo';
+import {
+  EXIT_SCAM_SIGNALS_TABLE,
+  NODE_TEST_METRICS_TABLE,
+  GLOSSARY_MATRIX_TABLE,
+  RESOURCES_DECISION_BRANCHES,
+  RESOURCES_ACTION_CARDS,
+  RESOURCES_HUB_FAQS,
+  RESOURCES_INTERNAL_CLUSTER_LINKS,
+} from '../../data/resources-hub-upgrade';
+
+const hub = getNavHub('resources');
+const urlPath = hub.href;
+const title = `${hub.title}专题 — 跑路预警、节点测速解读与新手百科`;
+const description =
+  '汇总机场跑路预警 5 大高危信号、MAI-TEST-BOT 与喵速测速图科学解读、IP 纯净度与 AI/流媒体检测方法、订阅流量暴涨泄漏重置、倍率/原生 IP 术语百科及零基础安全入门路线。';
+
+const verifiedDate = '2026-11-20';
+
+const all = await getAllPublishedContent();
+const relevant = all.filter(
+  (e) => e.data.urlPath.startsWith('/resources/') || e.data.category.includes('情报')
+);
+const featured = relevant.filter((e) => e.data.featured).slice(0, 4);
+
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: hub.title, href: urlPath },
+];
+
+const headings = [
+  { depth: 2, slug: 'exit-scam-signals', text: '一、机场跑路预警五大高危前兆与失联应急处置清单' },
+  { depth: 3, slug: 'outage-recovery-steps', text: '遭遇全节点 Timeout 与官网失联时，如何 10 分钟内定界止损？' },
+  { depth: 2, slug: 'node-testing-guide', text: '二、节点测速、IP 纯净度与 AI / 流媒体解锁验证体系' },
+  { depth: 3, slug: 'mai-vs-miaosu-truth', text: '看懂 2026-08-11 测速截图的局限：别被单一峰值的 500Mbps 迷惑' },
+  { depth: 3, slug: 'ip-purity-and-unlock', text: 'IP 类型（家宽 / ISP / IDC）、NAT 类型与跨区解锁实测法' },
+  { depth: 2, slug: 'glossary-guide', text: '三、机场术语与计费陷阱百科（倍率、折算价、重置日与原生 IP）' },
+  { depth: 2, slug: 'subscription-and-faq', text: '四、订阅异常排查：流量暴涨防泄漏、审计规则与专属端风险' },
+  { depth: 3, slug: 'traffic-leak-checklist', text: '后台流量一夜掉光？四步锁定高倍率、Allow LAN 与 BT 误走代理' },
+  { depth: 3, slug: 'audit-and-client-privacy', text: '服务端审计规则为什么会屏蔽某些访问？闭源专属客户端边界在哪？' },
+  { depth: 2, slug: 'intel-transparency', text: '五、风险情报审计：32 家品牌数据完整度、5.6 元集群与待核实档案' },
+  { depth: 2, slug: 'beginner-roadmap', text: '六、零基础安全入门路线图与四类突发情景处置决策' },
+  { depth: 2, slug: 'action-and-subtopics', text: '七、专题行动指南卡片与 7 个二级子栏目导航' },
+  { depth: 2, slug: 'faq', text: '八、资源与情报高频边界问题 FAQ（9 问）' },
+  { depth: 2, slug: 'related-clusters', text: '九、站内风险情报、检测教程与新手百科集群导航' },
+];
+
+const schemas = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: buildCanonicalUrl(urlPath),
+    inLanguage: 'zh-CN',
+    dateModified: verifiedDate,
+    author: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.author,
+    },
+    isPartOf: {
+      '@type': 'WebSite',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.domain,
+    },
+    hasPart: hub.subtopics.map((s) => ({
+      '@type': 'CollectionPage',
+      name: s.title,
+      url: buildCanonicalUrl(s.href),
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: RESOURCES_HUB_FAQS.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.answer,
+      },
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={urlPath}
+  ogType="article"
+  author={SITE_CONFIG.author}
+  publishDate="2026-10-15T00:00:00Z"
+  modifiedDate={`${verifiedDate}T23:40:00+08:00`}
+  tags={['跑路预警', '节点测速', '机场FAQ', '免费节点', 'IP纯净度', '订阅防泄漏', '新手帮助']}
+  structuredData={schemas}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Main Monograph Article Column -->
+      <article class="lg:col-span-8 min-w-0 space-y-10" data-pagefind-body>
+        <!-- Header & Answer-First Executive Summary -->
+        <header class="rounded-3xl bg-bg-surface border border-border-subtle p-6 sm:p-8 space-y-5">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="px-2.5 py-1 rounded-full bg-brand-soft text-brand-primary border border-blue-200 font-semibold">
+              一级导航专题 ④ · 风险情报、检测与新手知识区
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-white text-text-title border border-border-subtle font-mono">
+              最近核实：{verifiedDate}
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+              A 区纯情报与知识体系 · 0 商业外链
+            </span>
+          </div>
+
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-text-title tracking-tight leading-tight">
+            {title}
+          </h1>
+
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            无论是第一次接触代理工具的零基础新手，还是已经订阅过几家服务的老用户，决定长期体验安全与资金底线的往往不是“哪家界面好看”，而是对<strong>跑路前兆、测速图真伪、订阅流量异常泄漏、计费倍率规则以及免费资源隐私边界</strong>的判断力。本专题作为本站风险情报与核查百科总枢纽，直接拆解可验证的风控清单与排障顺序。
+          </p>
+
+          <!-- Answer-First Direct Conclusions -->
+          <div class="rounded-2xl bg-white border border-blue-200 p-5 space-y-3 shadow-xs">
+            <div class="flex items-center gap-2 text-sm font-bold text-brand-primary">
+              <span>直接判断结论（四大风险防线先记牢）</span>
+            </div>
+            <ul class="space-y-2 text-sm text-text-body leading-relaxed list-disc pl-5">
+              <li>
+                <strong>防跑路资金底线：</strong>首次订购新服务只付 1 个月，哪怕使用多年老品牌也不建议囤积两年/三年期或上千元终身大包；一旦看到某品牌突然低价甩卖超长周期套餐且伴随域名失联或工单停摆超过 72 小时，立即停充并准备热备订阅。
+              </li>
+              <li>
+                <strong>测速图科学读法：</strong>别被午后或凌晨测出的 500Mbps 单图冲昏头脑——要核查测试时段（是否处于 20:00–23:00 晚高峰）、测试工具（5Gbps MAI-TEST-BOT vs 9Gbps 喵速）、0B 死节点比例，并在美/日/新而非香港节点验收 ChatGPT 与 Claude。
+              </li>
+              <li>
+                <strong>订阅防泄漏与计费核查：</strong>后台流量突然异常暴跌时，先检查客户端是否误用 ×2/×5 倍率节点或开启了 Global 全局模式与 Allow LAN，随后立即在服务商后台点击「重置订阅链接（Reset Token）」；绝不将私人订阅直接提交给陌生公网转换网站。
+              </li>
+              <li>
+                <strong>免费资源安全边界：</strong>开源免费客户端（Clash Verge Rev / FlClash / v2rayN 等）安全可核验；来源不明的免费公共节点与免费 VPN 只可用于隔离浏览器窗口内的临时查询，严禁登录银行、主用邮箱、社交或电商主号。
+              </li>
+            </ul>
+            <div class="pt-1 flex flex-wrap gap-2.5 text-xs">
+              <a
+                href="#exit-scam-signals"
+                class="px-3.5 py-2 rounded-xl bg-brand-primary text-white font-semibold hover:bg-brand-primary-hover transition-colors"
+              >
+                核查跑路五大预警信号
+              </a>
+              <a
+                href="#node-testing-guide"
+                class="px-3.5 py-2 rounded-xl bg-bg-surface text-text-title border border-border-subtle font-semibold hover:border-brand-primary transition-colors"
+              >
+                测速图与 IP 解锁解读
+              </a>
+              <a
+                href="/resources/free-nodes/"
+                class="px-3.5 py-2 rounded-xl bg-bg-surface text-text-title border border-border-subtle font-semibold hover:border-brand-primary transition-colors"
+              >
+                进入免费节点专著页 →
+              </a>
+            </div>
+          </div>
+
+          <!-- Mobile Collapsible TOC -->
+          <div class="lg:hidden">
+            <details class="rounded-2xl border border-border-subtle bg-white p-4">
+              <summary class="text-sm font-bold text-text-title cursor-pointer flex items-center justify-between">
+                <span>本页完整章节目录（共 9 章）</span>
+                <span class="text-xs font-normal text-brand-primary">点击展开</span>
+              </summary>
+              <nav class="mt-3 space-y-1.5 text-xs border-t border-border-subtle pt-3">
+                {headings.map((h) => (
+                  <a
+                    href={`#${h.slug}`}
+                    class:list={[
+                      'block py-1 hover:text-brand-primary transition-colors',
+                      h.depth === 2 ? 'font-semibold text-text-title' : 'pl-3 text-text-muted',
+                    ]}
+                  >
+                    {h.text}
+                  </a>
+                ))}
+              </nav>
+            </details>
+          </div>
+        </header>
+
+        <!-- Section 1: Exit Scam Signals & Recovery -->
+        <section id="exit-scam-signals" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            一、机场跑路预警五大高危前兆与失联应急处置清单
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            跨境代理服务属于高度依赖持续运维带宽的预付费服务。过去几年行业里绝大多数跑路或“软跑路（留着破烂页面无人修节点）”案例，在彻底失联前的 1 至 4 周几乎都会先后放出明显信号。把下面这张核查表当作购前与日常巡检工具，能帮你避开绝大部分资金沉没损失。详见
+            <a href="/resources/airport-exit-scam-warning-signs/" class="text-brand-primary font-semibold hover:underline">机场跑路前兆清单与资金风控原则</a>。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 1：机场异常运营与跑路前兆识别矩阵</span>
+              <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[600px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-bold w-[24%]">预警信号与级别</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[38%]">典型异常表现</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[38%]">立刻采取的止损动作</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-text-body">
+                  {EXIT_SCAM_SIGNALS_TABLE.map((row) => (
+                    <tr class="hover:bg-slate-50/70 align-top">
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div class="font-bold text-text-title">{row.signal}</div>
+                        <span class="inline-block px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold">
+                          {row.severity}
+                        </span>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.whatItLooksLike}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.immediateAction}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 id="outage-recovery-steps" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            遭遇全节点 Timeout 与官网失联时，如何 10 分钟内定界止损？
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            并不是每一次大面积断网都意味着商家跑路，有时只是主域名遭遇 DNS 屏蔽、国内入口机房临时遭受 DDoS 攻击维护，或者是你自己电脑上的本地时钟偏差/防火墙更新所致。遇到突发断流时的正确自救顺序是：
+          </p>
+          <ol class="space-y-2 text-sm sm:text-base text-text-body leading-relaxed list-decimal pl-5">
+            <li>
+              <strong>先查本地环境（2 分钟定界）：</strong>确认系统网络时间误差在 30 秒内，打开客户端日志查看究竟是本地连不上入口 <code>i/o timeout</code> 还是域名解析报错，并切换手机 5G 热点对比是否单宽带阻断。详尽排障可查
+              <a href="/clash/fix-node-timeout-errors/" class="text-brand-primary font-semibold hover:underline">节点超时排查九步法</a>。
+            </li>
+            <li>
+              <strong>拉起百元热备订阅维持工作不断线：</strong>所有高频依赖跨境工具的开发者或办公族，都应在客户端常驻一条支持 Clash 的一次性不限时百元流量包作热备（具体选型见
+              <a href="/reviews/onetime-traffic-airports-guide/" class="text-brand-primary font-semibold hover:underline">不限时流量包品牌盘点</a>），先通过备用通道访问发布页或客服频道获取官方恢复公告，避免在盲目无助下搜到钓鱼网站。
+            </li>
+            <li>
+              <strong>评估账号密码撞库风险并清理本地授权：</strong>如果确认停服跑路，立即核查自己注册该机场时是否复用了主用邮箱（Gmail/QQ/163）的同一套高权限密码；如曾经复用过，请务必立刻更改对应邮箱与关联平台密码。操作细则参见
+              <a href="/resources/airport-outage-recovery/" class="text-brand-primary font-semibold hover:underline">机场失联应急处置指南</a>。
+            </li>
+          </ol>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            此外，在面对老牌或新盘突然发布“域名更换公告”或“新版官网上线通知”时，切勿直接从陌生电报私聊群友转发的短网址登录输入原有账号密码。稳妥的做法是：首先对照自己当初在收藏夹保存的官方永久发布页或开源客户端订阅备注栏里附带的官方引导地址；其次观察浏览器地址栏 SSL 证书与面板后端架构是否与历史记录一致，如果新站点一上来就要求“先交 20 元激活迁移账户”或“下载强制关闭杀毒软件的全新压缩包”，几乎可以 100% 判定为有人趁乱假冒原品牌实施二次收割钓鱼。若原机场已彻底停止响应且你的设备上安装过其闭源专属客户端，建议立刻卸载该客户端并清理系统网络代理残留，回到支持通用开源客户端的备用体系，把软件控制权收归本地。
+          </p>
+        </section>
+
+        <!-- Section 2: Node Speedtest & IP Purity -->
+        <section id="node-testing-guide" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            二、节点测速、IP 纯净度与 AI / 流媒体解锁验证体系
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            无论是看第三方频道晒出来的测速长图，还是自己拿到新月付订阅后用客户端测延迟，如果不搞清各项技术指标究竟在测什么，极容易做出“明明写着 30ms 和 500Mbps，我连上后连 GPT 都报错”的误判。下表归纳了最核心的四项检验指标及其常见误区。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 2：节点可用性与性能验收四大指标标准</span>
+              <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[620px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-bold w-[22%]">检测维度</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">真实测量对象</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">新手常见误判</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">科学核验标准</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-text-body">
+                  {NODE_TEST_METRICS_TABLE.map((row) => (
+                    <tr class="hover:bg-slate-50/70 align-top">
+                      <td class="p-3 sm:p-3.5 font-bold text-text-title leading-relaxed">{row.metricName}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.whatItMeasures}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.commonMisconception}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.verificationStandard}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 id="mai-vs-miaosu-truth" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            看懂 2026-08-11 测速截图的局限：别被单一峰值的 500Mbps 迷惑
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            以本站归档收录的 2026-08-11 实测资料包为例，其中覆盖了 16 家机场的原始节点图集。为什么本站坚决不把这 16 张图硬凑成一个“第 1 名至第 16 名排行榜”？因为从截图底部的时间戳与接口参数可以清楚看到两重客观差异：首先，测试时间分布跨越了整整 22 小时（例如一翻云跑于凌晨 `00:21`、唯兔云与光速云跑于午后 `13:55–14:32`，而宇宙云、U1S1 与极连云则实打实测在 `21:04–22:46` 晚高峰后段）；其次，测试工具分成了 **MAI-TEST-BOT 2.0.0-dev（珠海联通 5Gbps 后端，Shadowsocks）** 与 **喵速 4.7.0（珠海联通 9Gbps 后端，VLESS）** 两大界面。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            因此，任何只截取某一帧凌晨峰值速度就宣布“全网速度第一”的榜单都缺乏科学依据。正确做法是同时对照各品牌页与
+            <a href="/comparisons/2026-airport-speedtest-benchmark/" class="text-brand-primary font-semibold hover:underline">2026-08-11 测速档案横向对照</a> 中标注的时间戳、失败节点率（0B 数量）以及同一批次晚间时段表现，并在首月用自家宽带在晚 21 点复验。教程细则见
+            <a href="/resources/how-to-test-nodes/" class="text-brand-primary font-semibold hover:underline">科学解读节点测速截图教程</a>。
+          </p>
+
+          <h3 id="ip-purity-and-unlock" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            IP 类型（家宽 / ISP / IDC）、NAT 类型与跨区解锁实测法
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            测完速能通之后，很多读者紧接着会遇到“能开 Google，但打开 Claude/ChatGPT 报错或者 Netflix 只剩自制剧”。核心影响变量是节点的<strong>出口 IP 属性</strong>：普通数据中心（IDC）机房段因为长期承受爬虫和匿名代理流量，极易被 Cloudflare、OpenAI、Anthropic 与流媒体平台标记拦截；而具备真实本地运营商属性（ISP / 住宅属性或高纯净度原生落地）的节点则更容易通过检测。自检时记住两条经验：第一，不要拿香港节点去测 ChatGPT/Claude，这是平台地区禁止接入而非节点烂；第二，如从事游戏联机或 TikTok 跨境运营，还需要额外用 STUN 工具核对节点是否支持 UDP FullCone NAT，以及浏览器端有没有暴露真实 WebRTC/IPv6 与时区。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            实际动手验收时可以按以下三步在本地快速完成验证：首先，把订阅导入支持单节点选中的 Clash Verge Rev 后，切换到目标节点（例如新加坡、日本、台湾或美国线路），打开 IP 归属检测页核查 ASN 类别（看清到底是 <code>Hosting</code> 数据中心段还是 <code>ISP</code> 本地运营商段）以及风险评分，避免拿高风险广播段去登录风控严苛的主账号；其次，使用隔离无痕浏览器窗口分别打开目标流媒体或 AI 服务网页，重点观察是否能跳过图形验证直接进入对话界面或播放非自制区域剧集，并且关注页面返回的 <code>IPv6</code> 地址栏是否仍意外暴露本地运营商省市前缀（若出现双栈泄漏，请立即按
+            <a href="/resources/ipv6-conflict-and-dual-stack-fix/" class="text-brand-primary font-semibold hover:underline">IPv6 双栈冲突与泄漏修复方案</a> 关闭多余 AAAA 解析或开启客户端对应拦截）；最后，针对需要实时语音或主机联机的用户，应在开启 Clash TUN 模式且节点允许 UDP 转发的条件下，运行一次本地 STUN 探测确认返回值不为 Symmetric 对称型，避免开黑时频繁掉出联机房间。详见
+            <a href="/resources/ip-purity-and-unlock-check/" class="text-brand-primary font-semibold hover:underline">IP 纯净度与 AI/流媒体检测指南</a> 与
+            <a href="/resources/tiktok-cross-border-network-guide/" class="text-brand-primary font-semibold hover:underline">TikTok 跨境运营网络环境规范</a>。
+          </p>
+        </section>
+
+        <!-- Section 3: Glossary Matrix -->
+        <section id="glossary-guide" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            三、机场术语与计费陷阱百科（倍率、折算价、重置日与原生 IP）
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            各家推广文案里充斥着大量高度压缩的专业缩写和计费话术。下面把最直接影响你钱包支出和日常体验的五个核心术语拆开讲透，帮助你一眼识别字面下的真实条件：
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 3：高频机场术语、实际消费影响与核对方法</span>
+              <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[600px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-bold w-[22%]">高频术语 / 概念</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">真实技术/计费含义</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">对费用或体验的影响</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">购前与使用核查方式</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-text-body">
+                  {GLOSSARY_MATRIX_TABLE.map((row) => (
+                    <tr class="hover:bg-slate-50/70 align-top">
+                      <td class="p-3 sm:p-3.5 font-bold text-text-title leading-relaxed">{row.term}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.realMeaning}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.impactOnCostOrExperience}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.howToVerify}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            在实际核算成本时，最容易踩中的是三类隐性口径差：第一，<strong>单 GB 有效成本差</strong>——年付 ¥99 给 69GB/月（如光速云轻量版）看似月均 ¥8.25，单 GB 约 ¥0.12，但如果中途遇政策变更或跨网不适应往往不支持退款；而真实月付 ¥19.9–¥25 给 150GB–168GB（约 ¥0.13–¥0.15/GB），既拥有两倍以上余量又能随时单月止损。第二，<strong>不限时包盈亏平衡点</strong>——百元不限时包（如 ¥147/247GB 约 ¥0.595/GB、¥100/100GB 约 ¥1.00/GB）只适合月消耗 10GB 以下的低频查资料或主力双活灾备，如果每月稳定看视频消耗超过 40GB，按单月买包月套餐远比买不限时划算。第三，<strong>特殊特价商品不可退、优惠码排除与重置日差异</strong>——多个品牌已明示年付轻量款、永久套餐不参与折扣码且下单后概不退款；此外如果遇到按“每月 1 号自然日清零”而不是“按购买日起每 30 天滚动重置”的旧式面板，月底 26 号买单月套餐会白白亏掉大半个月有效期，付款前务必在服务商计费条款页核实清零周期。
+          </p>
+          <p class="text-sm text-text-body leading-relaxed">
+            更多概念拆解与具体计费案例（含不限时不过期前提与特殊特价档退款限制），可继续查阅
+            <a href="/resources/airport-glossary-faq/" class="text-brand-primary font-semibold hover:underline">机场术语 FAQ 全集</a> 与
+            <a href="/resources/airport-billing-faq/" class="text-brand-primary font-semibold hover:underline">套餐计费与重置规则 FAQ</a>。
+          </p>
+        </section>
+
+        <!-- Section 4: Subscription Issues & Client Privacy -->
+        <section id="subscription-and-faq" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            四、订阅异常排查：流量暴涨防泄漏、审计规则与专属端风险
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            进入日常稳定使用阶段后，用户高频遇到的两类非纯节点故障分别是「剩余流量莫名暴涨消耗」以及「明明网页都能打开，唯独几个特定工具或网站连不上」。绝大多数时候，前者是本地代理模式或 Token 泄漏引起，后者则是命中了服务端的防滥用审计策略。
+          </p>
+
+          <h3 id="traffic-leak-checklist" class="text-lg sm:text-xl font-bold text-text-title pt-1">
+            后台流量一夜掉光？四步锁定高倍率、Allow LAN 与 BT 误走代理
+          </h3>
+          <ul class="space-y-2 text-sm sm:text-base text-text-body leading-relaxed list-disc pl-5">
+            <li>
+              <strong>一查模式与规则：</strong>确认客户端没有停留在 <code>Global</code> 全局模式——只要开着全局刷国内 1080P 长视频或更新几十 GB 游戏/系统补丁，半天就能把一个月 150GB 流量刷穿。
+            </li>
+            <li>
+              <strong>二查高倍率节点与自动测速：</strong>如果策略组启用了 <code>url-test</code> 自动选优且刚好某条 ×3/×5 倍率节点延迟最低，后台扣流速度会直接翻数倍。日常固定锁定 1 倍主力地区节点。
+            </li>
+            <li>
+              <strong>三查 TUN 下 BT/网盘与系统更新：</strong>开启 Clash Verge Rev 的 TUN 虚拟网卡模式后，原本走直连的下载软件、网盘同步或大文件缓存若缺少直连分流规则也会钻进代理隧道；可在配置中给下载进程添加 <code>DIRECT</code> 规则。
+            </li>
+            <li>
+              <strong>四防 Token 泄漏与局域网免密被蹭：</strong>如果曾经把完整订阅链接贴到陌生公网在线转换网页、或开启了 Allow LAN 却连在公共 Wi-Fi/合租路由器下，任何拿到你订阅 Token 的外人都能直接消费你的额度。一旦怀疑泄漏，立即在机场后台重置订阅地址并在客户端覆盖旧链接。详见
+              <a href="/resources/subscription-traffic-leak-fix/" class="text-brand-primary font-semibold hover:underline">订阅流量暴涨排查与重置教程</a>。
+            </li>
+          </ul>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            排查流量异常消耗时，还有一个常被忽略的隐藏入口是<strong>客户端内置的实时连接（Connections）监控面板</strong>：打开该面板按“当前上传/下载字节数”倒序排序，只要观察 30 秒就能直观抓出到底是哪一个进程（例如 `aria2c.exe`、`qbittorrent.exe`、`OneDrive.exe` 或某个无人值守的后台系统更新服务）正在通过海外节点高速吞吐流量，以及它当前命中的究竟是订阅自带的第几条分流规则。如果你确定流量来自未知陌生设备而不是本机进程，则几乎可以肯定是订阅 URL 中的鉴权 Token 在某个环节发生了泄漏，此时除了重置订阅密钥，还应顺便修改该机场面板的登录密码并检查是否有不明设备处于在线活跃状态。
+          </p>
+
+          <h3 id="audit-and-client-privacy" class="text-lg sm:text-xl font-bold text-text-title pt-1">
+            服务端审计规则为什么会屏蔽某些访问？闭源专属客户端边界在哪？
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            正规运营的服务商通常会在中转与落地端强制部署“审计拦截规则”，重点封堵 BT/PT 版权下载、垃圾邮件发信端口（25 端口）、高危扫描与部分涉敏目标站，目的是防止整组昂贵的专线与原生 IP 因单个用户滥用而被上游机房封停清退。详细条目与误触边界可查
+            <a href="/resources/airport-audit-rules-explained/" class="text-brand-primary font-semibold hover:underline">机场审计规则与封禁常见原因</a>。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            此外，面对近年来部分商家停掉第三方订阅、强制要求下载自研专属客户端的趋势，务必保有清醒认知：开源通用客户端（Clash Verge Rev、FlClash、v2rayN）代码公开接受全球开发者审计，软件本身只处理本地分流不收集账号隐私；而闭源专属软件虽然免去了手动导入步骤，但其网络请求拦截逻辑、附加权限及日志采集策略完全处于黑盒之中。如果你的主力设备存有重要开发密钥、企业内网凭证或数字资产，应优先选用保留开源通用订阅接入的服务商。对比分析见
+            <a href="/resources/proprietary-client-risks/" class="text-brand-primary font-semibold hover:underline">闭源专属客户端风险分析</a>。
+          </p>
+        </section>
+
+        <!-- Section 5: Data Transparency & Brand Intel -->
+        <section id="intel-transparency" class="scroll-mt-24 space-y-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            五、风险情报审计：32 家品牌数据完整度、5.6 元集群与待核实档案
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            做风险情报的核心原则是<strong>宁愿明示缺口，也不拿旧记录凑虚假满分</strong>。在整理本地全部 32 家建档品牌资料时，我们公开披露了三类关键审计发现：第一，文字清单经核实去重后为 31 家（合并了重复条目的 Firefly 萤火虫），另加实测包独有的「快狸」（仅存 08-11 截图与图标，暂缺文字套餐价目），共同构成 32 个透明档案；第二，大佬云、闪电鼠、云界线、榴莲云、环球梯 5 家 ¥5.6/月档存在高度复制规格且缺失独立测速图（其中云界线与环球梯官网链接缺 <code>#/</code>，云界线存在两套前后不一致邀请码，榴莲云则是该档唯一未明示协议类型的条目），仅作审慎备案而不作主力推荐；第三，宇宙云、灵动云、浪网、EdgeNova 与快狸因缺新周期报价或文字档，全站明确标注为「待核实 / 历史存档」，直到获得可核查的新资料再更新。对于日常选型来说，先查“数据完整度”与“文案自相矛盾记录”（例如光速云轻量版在历史摘要写 59GB 而明细表写 69GB、微风网络摘要行写 7 元而明细表为 ¥137/年），本身就是过滤营销话术最有效的第一道防火墙。
+          </p>
+          <div class="rounded-2xl border border-border-subtle bg-white p-5 space-y-2.5 text-sm text-text-body leading-relaxed">
+            <h3 class="text-base font-bold text-text-title">五家「待核实 / 历史存档」品牌具体缺口明细（绝不猜价填充）</h3>
+            <ul class="list-disc pl-5 space-y-1.5 text-xs sm:text-sm">
+              <li>
+                <strong>宇宙云（UniverseCloud）：</strong>保留 2026-08-11 21:04 晚间 9Gbps 喵速 VLESS 实测截图与历史 ¥96/年起记，但缺失最新完整多档套餐价格表、月流量配额与客户端兼容详情。
+              </li>
+              <li>
+                <strong>灵动云（LingDongYun）：</strong>停留在 2026-08 历史存档阶段，虽留有早期 2026-07 OpenAI 历史测试记录，但缺乏最新周期可用性与当前有效价格清单。
+              </li>
+              <li>
+                <strong>浪网（LangWang）：</strong>历史文档仅存早期简介及部分链接记录，无完整可复核多周期价目表与近期节点实测截图。
+              </li>
+              <li>
+                <strong>边缘节点（EdgeNova）：</strong>属于 2026-08 归档品牌条目，缺乏最新运营核实记录与近 30 日实测，当前保留历史标注提醒用户勿轻信过时宣传。
+              </li>
+              <li>
+                <strong>快狸（KuaiLi）：</strong>仅存在 2026-08-11 实测资料包图片（19:52 喵速 VLESS 截图）与图标资源，原始文字清单完全缺失其价格、官网入口与服务条款，因此站内档案 `/brands/kuaili/` 明确标为「仅含实测截图·价格待核实」。
+              </li>
+            </ul>
+            <p class="pt-1">
+              对于以上五家暂未补全最新周期文本与核验数据的品牌，本站严格遵循不编造缺失字段的审核边界：在尚未获取到真实有效的官方套餐明细表与近 30 日交叉测速证据之前，绝不在对比表里使用他家历史参数进行猜测填充，也不会向用户强推此类存在高不确定性的条目。
+            </p>
+            <p class="pt-1 text-xs">
+              完整审计口径与全部品牌交叉核对差异明细，请阅
+              <a href="/reviews/brand-data-transparency-audit/" class="text-brand-primary font-semibold hover:underline">32 家品牌资料透明度审计报告</a> 与
+              <a href="/reviews/kuaili-and-historical-brands-audit/" class="text-brand-primary font-semibold hover:underline">快狸与历史待核实品牌核查专报</a>。
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 6: Beginner Roadmap & Decision Branches -->
+        <section id="beginner-roadmap" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            六、零基础安全入门路线图与四类突发情景处置决策
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            如果你刚接触这类网络工具，还没完全建立整套操作概念，请先记住一条核心秩序：<strong>不要先跑去百度或网盘搜免费客户端乱装</strong>。正确的四步路线是：1）阅读基础原理看清开源客户端与订阅服务的分离关系；2）从官方可信验证渠道（GitHub Release + SHA256 核验）备好桌面/手机软件；3）选一家支持第三方订阅且允许单月购买的服务按月试用 3 天验收晚高峰；4）做好 Rule 分流、AI 独立固定组与百元不限时热备。完整引导可看
+            <a href="/guides/beginner-onboarding-roadmap/" class="text-brand-primary font-semibold hover:underline">零基础入门 4 步路线图</a>。
+          </p>
+          <div class="rounded-2xl border border-border-subtle bg-white p-5 space-y-3 text-sm text-text-body leading-relaxed">
+            <h3 class="text-base font-bold text-text-title">不同起步阶段的安全配置组合参考与月度巡检习惯</h3>
+            <p>
+              <strong>第一档（单机轻度查资料 / 学生入门）：</strong>只装一套开源客户端（Clash Verge Rev 或手机 FlClash / Shadowrocket），购入支持月付的入门专线或百元级不限时包即可，切忌一次性花大几百元买多年套餐；每月 1 号花一分钟看一眼面板已用流量曲线，确认无异常陡增。
+            </p>
+            <p>
+              <strong>第二档（开发者 / AI 生产力重度用户）：</strong>选择两家支持第三方订阅的不同底层线路机场形成「包月主力 + 百元不限时备用」双活结构，并通过 Clash Merge 覆写脚本锁定 AI 工具专用组与国内代码镜像直连规则；每次更换网络环境（例如从家庭宽带切入酒店或公司公共无线网）时确认关闭了 Allow LAN 开关，并且绝不把包含鉴权令牌的订阅 URL 贴入未知公网网页工具。
+            </p>
+            <p>
+              <strong>第三档（家庭全设备覆盖 / 电视盒子与主机）：</strong>只有在具备 OpenWrt 旁路由运维排障能力、且确认服务商不锁专属客户端的前提下，才考虑使用 OpenClash、PassWall2 或 Nikki（OpenWrt 24.10+）；否则单台电脑临时共享局域网或各端单独装开源客户端，远比折腾崩掉全家网关更稳妥。若是遇到具体突发异常，按下方四类情景直接进入对应处置路线：
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {RESOURCES_DECISION_BRANCHES.map((branch) => (
+              <div class="rounded-2xl border border-border-subtle bg-white p-5 flex flex-col justify-between gap-4">
+                <div class="space-y-2.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-soft text-brand-primary border border-blue-200">
+                      {branch.badge}
+                    </span>
+                  </div>
+                  <h3 class="text-base font-bold text-text-title leading-snug">{branch.title}</h3>
+                  <p class="text-xs text-text-body leading-relaxed">
+                    <strong>触发条件：</strong>{branch.condition}
+                  </p>
+                  <p class="text-xs text-text-body leading-relaxed">
+                    <strong>应对建议：</strong>{branch.recommendation}
+                  </p>
+                  <p class="text-xs text-amber-800 bg-amber-50/70 border border-amber-200 rounded-xl p-2.5 leading-relaxed">
+                    <strong>千万别做：</strong>{branch.avoid}
+                  </p>
+                  <ol class="text-xs text-text-body space-y-1 list-decimal pl-4 leading-relaxed">
+                    {branch.steps.map((s) => (
+                      <li>{s}</li>
+                    ))}
+                  </ol>
+                </div>
+                <a
+                  href={branch.href}
+                  class="inline-flex items-center justify-center px-3.5 py-2 rounded-xl bg-bg-surface border border-border-subtle text-xs font-semibold text-brand-primary hover:border-brand-primary transition-colors"
+                >
+                  {branch.ctaText} →
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Section 7: Action Guides & 7 Subtopics Navigation -->
+        <section id="action-and-subtopics" class="scroll-mt-24 space-y-6">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            七、专题行动指南卡片与 7 个二级子栏目导航
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {RESOURCES_ACTION_CARDS.map((card) => (
+              <div class="rounded-2xl border border-border-subtle bg-white p-5 flex flex-col justify-between gap-4 shadow-xs">
+                <div class="space-y-2">
+                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-bg-surface text-text-muted border border-border-subtle">
+                    {card.category}
+                  </span>
+                  <h3 class="text-base font-bold text-text-title leading-snug">{card.title}</h3>
+                  <p class="text-xs text-text-body leading-relaxed">{card.summary}</p>
+                  <p class="text-[11px] text-text-muted leading-relaxed">{card.scopeNote}</p>
+                </div>
+                <a
+                  href={card.href}
+                  class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-brand-primary text-white text-xs font-semibold hover:bg-brand-primary-hover transition-colors"
+                >
+                  {card.ctaLabel} →
+                </a>
+              </div>
+            ))}
+          </div>
+
+          <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <h3 class="text-base font-bold text-text-title">资源与情报专题二级导航目录（共 {hub.subtopics.length} 个子栏目）</h3>
+              <span class="text-xs text-text-muted">涵盖免费节点、跑路预警、FAQ、情报审计、节点检测、订阅问题与新手帮助</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {hub.subtopics.map((sub) => (
+                <a
+                  href={sub.href}
+                  class="rounded-xl border border-border-subtle bg-white p-4 flex flex-col justify-between gap-2 hover:border-brand-primary transition-colors group"
+                >
+                  <div>
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-sm font-bold text-text-title group-hover:text-brand-primary transition-colors">
+                        {sub.title}
+                      </span>
+                      <span class="text-[11px] text-text-muted shrink-0">{sub.clusters.length} 集群</span>
+                    </div>
+                    <p class="text-xs text-text-muted mt-1 leading-relaxed">{sub.description}</p>
+                  </div>
+                  <span class="text-xs font-semibold text-brand-primary">进入子专题 →</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 8: High-Value Boundary FAQs -->
+        <section id="faq" class="scroll-mt-24 space-y-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            八、资源与情报高频边界问题 FAQ（9 问）
+          </h2>
+          <div class="space-y-3">
+            {RESOURCES_HUB_FAQS.map((faq) => (
+              <details class="group rounded-2xl border border-border-subtle bg-white p-4 sm:p-5">
+                <summary class="font-semibold text-text-title cursor-pointer flex items-center justify-between gap-3 list-none text-sm sm:text-base">
+                  <span>{faq.question}</span>
+                  <svg class="w-4 h-4 text-text-muted shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                  </svg>
+                </summary>
+                <div class="mt-3 text-sm text-text-body leading-relaxed space-y-2">
+                  <p>{faq.answer}</p>
+                  {faq.anchorHref && faq.anchorLabel && (
+                    <p>
+                      <a href={faq.anchorHref} class="text-xs font-semibold text-brand-primary hover:underline">
+                        对应章节：{faq.anchorLabel} ↑
+                      </a>
+                    </p>
+                  )}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        <!-- Section 9: Internal Clusters & Featured Articles -->
+        <section id="related-clusters" class="scroll-mt-24 space-y-6" data-pagefind-ignore>
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            九、站内风险情报、检测教程与新手百科集群导航
+          </h2>
+          <p class="text-sm text-text-body leading-relaxed">
+            下面汇集了本专题所属的全部关键情报、测速解码、订阅排障与入门引导专文（共 {relevant.length} 篇专题内容可供深入查阅）：
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {RESOURCES_INTERNAL_CLUSTER_LINKS.map((item) => (
+              <a
+                href={item.href}
+                class="card-elevated p-4 flex flex-col justify-between gap-2 group"
+              >
+                <div>
+                  <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium bg-bg-surface text-text-muted border border-border-subtle mb-1.5">
+                    {item.tag}
+                  </span>
+                  <h3 class="text-sm font-bold text-text-title group-hover:text-brand-primary transition-colors">
+                    {item.title}
+                  </h3>
+                  <p class="text-xs text-text-muted mt-1 leading-relaxed">{item.purpose}</p>
+                </div>
+                <span class="text-xs font-semibold text-brand-primary">阅读该页面 →</span>
+              </a>
+            ))}
+          </div>
+
+          {featured.length > 0 && (
+            <div class="space-y-4 pt-2">
+              <h3 class="text-base font-bold text-text-title">本专题精选核心实战篇</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {featured.map((entry) => (
+                  <ArticleCard
+                    title={entry.data.title}
+                    description={entry.data.description}
+                    urlPath={entry.data.urlPath}
+                    pageType={entry.data.pageType}
+                    category={entry.data.category}
+                    pubDate={entry.data.pubDate}
+                    updatedDate={entry.data.updatedDate}
+                    body={entry.body}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      </article>
+
+      <!-- Desktop Sticky Sidebar TOC & Quick Tools -->
+      <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1" data-pagefind-ignore>
+        <TableOfContents headings={headings} />
+
+        <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5 space-y-3 text-xs">
+          <h2 class="text-sm font-bold text-text-title">风险核查与核心工具直达</h2>
+          <p class="text-text-body leading-relaxed">
+            遇到免费节点校验、数据透明审计或想对比可信服务方案时，可直接访问以下站内工具：
+          </p>
+          <div class="flex flex-col gap-2">
+            <a
+              href="/resources/free-nodes/"
+              class="px-4 py-2.5 rounded-xl bg-brand-primary text-white font-semibold text-center hover:bg-brand-primary-hover transition-colors"
+            >
+              打开免费节点安全边界万字专著
+            </a>
+            <a
+              href="/reviews/brand-data-transparency-audit/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              查看 32 家品牌资料透明度审计
+            </a>
+            <a
+              href="/clash/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              获取官方开源 Clash 客户端教程
+            </a>
+            <a
+              href="/brands/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              进入 32 家品牌筛选数据库（了解详情）
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,255 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/common/Breadcrumbs.astro';
+import TableOfContents from '../components/common/TableOfContents.astro';
+import AffiliateDisclosure from '../components/commercial/AffiliateDisclosure.astro';
+import RelatedBrand from '../components/commercial/RelatedBrand.astro';
+import BrandInfrastructureSnapshot from '../components/charts/BrandInfrastructureSnapshot.astro';
+import NetworkPerformanceReport from '../components/charts/NetworkPerformanceReport.astro';
+import StreamingAvailabilityMatrix from '../components/charts/StreamingAvailabilityMatrix.astro';
+import NetworkTopology from '../components/charts/NetworkTopology.astro';
+import ArticleCard from '../components/cards/ArticleCard.astro';
+import FaqAccordion from '../components/common/FaqAccordion.astro';
+import { getBrandBySlug } from '../data/brands';
+import { SITE_CONFIG } from '../data/site';
+import { buildBreadcrumbSchema, buildCanonicalUrl, buildFaqSchema, formatDateZh, type BreadcrumbItem, type FAQItem } from '../utils/seo';
+import type { AnyContentEntry } from '../utils/content';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  urlPath: string;
+  category: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  verifiedAt?: Date;
+  author?: string;
+  tags?: string[];
+  brandSlugs?: string[];
+  pros?: string[];
+  cons?: string[];
+  suitableFor?: string[];
+  notSuitableFor?: string[];
+  verdict?: string;
+  sources?: string[];
+  faqs?: FAQItem[];
+  headings?: Heading[];
+  breadcrumbs: BreadcrumbItem[];
+  relatedEntries?: AnyContentEntry[];
+}
+
+const {
+  title,
+  description,
+  urlPath,
+  category,
+  pubDate,
+  updatedDate,
+  verifiedAt,
+  author = SITE_CONFIG.author,
+  tags = [],
+  brandSlugs = [],
+  pros = [],
+  cons = [],
+  suitableFor = [],
+  notSuitableFor = [],
+  verdict,
+  sources = [],
+  faqs = [],
+  headings = [],
+  breadcrumbs,
+  relatedEntries = [],
+} = Astro.props;
+
+const primaryBrand = brandSlugs.length > 0 ? getBrandBySlug(brandSlugs[0]) : undefined;
+const canonical = buildCanonicalUrl(urlPath);
+
+const schemas: object[] = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: title,
+    description,
+    url: canonical,
+    datePublished: pubDate.toISOString(),
+    dateModified: (updatedDate || pubDate).toISOString(),
+    inLanguage: 'zh-CN',
+    author: { '@type': 'Organization', name: author },
+    publisher: { '@type': 'Organization', name: SITE_CONFIG.name, url: SITE_CONFIG.domain },
+  },
+];
+
+if (faqs.length > 0) {
+  schemas.push(buildFaqSchema(faqs));
+}
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={urlPath}
+  ogType="article"
+  author={author}
+  publishDate={pubDate.toISOString()}
+  modifiedDate={(updatedDate || pubDate).toISOString()}
+  tags={tags}
+  structuredData={schemas}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <article class="lg:col-span-8 min-w-0" data-pagefind-body>
+        <header class="mb-7 pb-6 border-b border-border-subtle">
+          <div class="flex flex-wrap items-center gap-2 mb-3 text-xs">
+            <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+              独立评测 · {category}
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-bg-surface text-text-title border border-border-subtle font-mono">
+              核实日期：{verifiedAt ? formatDateZh(verifiedAt) : primaryBrand?.verifiedAt || formatDateZh(pubDate)}
+            </span>
+          </div>
+
+          <h1 class="text-2xl sm:text-4xl font-extrabold text-text-title leading-tight mb-4">
+            {title}
+          </h1>
+
+          <div class="rounded-2xl bg-bg-surface border border-border-subtle p-5 space-y-2.5">
+            <div class="text-sm font-bold text-text-title">评测结论摘要</div>
+            <p class="text-sm sm:text-base text-text-body leading-relaxed">
+              {verdict || description}
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-4 mt-4 text-xs text-text-muted font-mono">
+            <span>评测编辑：{author}</span>
+            <span>发布：{formatDateZh(pubDate)}</span>
+            {updatedDate && <span>更新：{formatDateZh(updatedDate)}</span>}
+          </div>
+        </header>
+
+        <!-- Commercial Disclosure (Transparent) -->
+        <div class="mb-6">
+          <AffiliateDisclosure compact />
+        </div>
+
+        <!-- Pros & Cons Grid -->
+        {(pros.length > 0 || cons.length > 0 || primaryBrand) && (
+          <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-5">
+              <h2 class="text-sm font-bold text-emerald-900 mb-3">核心优势与核实亮点</h2>
+              <ul class="space-y-2 text-sm text-emerald-950 list-disc pl-4">
+                {(pros.length > 0 ? pros : primaryBrand?.pros || []).map((p) => (
+                  <li>{p}</li>
+                ))}
+              </ul>
+            </div>
+            <div class="rounded-2xl border border-rose-200 bg-rose-50/40 p-5">
+              <h2 class="text-sm font-bold text-rose-900 mb-3">主要限制与风险提示</h2>
+              <ul class="space-y-2 text-sm text-rose-950 list-disc pl-4">
+                {(cons.length > 0 ? cons : primaryBrand?.cons || []).map((c) => (
+                  <li>{c}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
+
+        <!-- Suitable vs Not Suitable -->
+        {(suitableFor.length > 0 || notSuitableFor.length > 0) && (
+          <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {suitableFor.length > 0 && (
+              <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5">
+                <h2 class="text-sm font-bold text-text-title mb-2.5">更适合的人群</h2>
+                <ul class="space-y-1.5 text-sm text-text-body list-disc pl-4">
+                  {suitableFor.map((item) => <li>{item}</li>)}
+                </ul>
+              </div>
+            )}
+            {notSuitableFor.length > 0 && (
+              <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5">
+                <h2 class="text-sm font-bold text-text-title mb-2.5">不建议选择的人群</h2>
+                <ul class="space-y-1.5 text-sm text-text-body list-disc pl-4">
+                  {notSuitableFor.map((item) => <li>{item}</li>)}
+                </ul>
+              </div>
+            )}
+          </section>
+        )}
+
+        <!-- Dark Network Observatory Charts if linked to a brand -->
+        {primaryBrand && (
+          <div class="space-y-2 mb-6">
+            <BrandInfrastructureSnapshot brand={primaryBrand} />
+            <NetworkPerformanceReport brand={primaryBrand} />
+            <StreamingAvailabilityMatrix brand={primaryBrand} />
+            <NetworkTopology brand={primaryBrand} />
+          </div>
+        )}
+
+        <div class="editorial-prose">
+          <slot />
+        </div>
+
+        <FaqAccordion title="评测常见问答 FAQ" faqs={faqs} />
+
+        {(sources.length > 0 || (primaryBrand && primaryBrand.sources.length > 0)) && (
+          <section class="mt-8 rounded-2xl bg-bg-surface border border-border-subtle p-4 text-xs text-text-muted">
+            <h3 class="font-semibold text-text-title mb-1.5">信息来源与核实边界</h3>
+            <ul class="list-disc pl-5 space-y-1">
+              {(sources.length > 0 ? sources : primaryBrand?.sources || []).map((src) => (
+                <li>{src}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {primaryBrand && (
+          <div class="mt-8">
+            <RelatedBrand brandSlug={primaryBrand.slug} />
+          </div>
+        )}
+      </article>
+
+      <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-24" data-pagefind-ignore>
+        <TableOfContents headings={headings} />
+        <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5 text-xs space-y-2.5">
+          <h3 class="text-sm font-bold text-text-title">独立评测准则</h3>
+          <p class="text-text-body leading-relaxed">
+            商业推广合作优先级不决定评测排名。所有测速快照均明确区分测试日期、工具环境与非晚高峰样本，品牌资料声明均标为 Vendor Data。
+          </p>
+          <a href="/comparisons/" class="inline-block font-semibold text-brand-primary hover:underline">
+            浏览多品牌横向对比 →
+          </a>
+        </div>
+      </aside>
+    </div>
+
+    {relatedEntries.length > 0 && (
+      <section class="mt-14 pt-8 border-t border-border-subtle" data-pagefind-ignore>
+        <h2 class="text-xl font-bold text-text-title mb-5">延伸评测与对比</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {relatedEntries.slice(0, 3).map((entry) => (
+            <ArticleCard
+              title={entry.data.title}
+              description={entry.data.description}
+              urlPath={entry.data.urlPath}
+              pageType={entry.data.pageType}
+              category={entry.data.category}
+              pubDate={entry.data.pubDate}
+              updatedDate={entry.data.updatedDate}
+              body={entry.body}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</BaseLayout>

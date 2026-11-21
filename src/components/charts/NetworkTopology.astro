@@ -1,0 +1,68 @@
+---
+import type { BrandRecord } from '../../data/brands/types';
+
+interface Props {
+  brand: BrandRecord;
+}
+
+const { brand } = Astro.props;
+const is专线 = brand.lineTags.includes('IEPL') || brand.lineTags.includes('IPLC');
+---
+
+<section
+  class="rounded-2xl bg-[#0B1220] text-slate-100 border border-slate-800 p-5 sm:p-6 my-6 shadow-lg"
+  aria-label={`${brand.name} 网络线路路径观测图`}
+>
+  <div class="flex flex-wrap items-start justify-between gap-3 pb-4 border-b border-slate-800/90">
+    <div>
+      <div class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-wider">
+        <span class="w-2 h-2 rounded-full" style={`background-color: ${brand.accentColor}`}></span>
+        <span>Network Path Observatory</span>
+      </div>
+      <h3 class="text-lg font-bold text-white mt-1">
+        {brand.name} 传输架构与线路拓扑示意
+      </h3>
+    </div>
+    <span class="px-2.5 py-1 rounded-full text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700">
+      Conceptual Topology · 基于品牌披露参数
+    </span>
+  </div>
+
+  <div class="mt-5 grid grid-cols-1 md:grid-cols-7 gap-3 items-center text-xs">
+    <!-- Node 1: Client -->
+    <div class="md:col-span-2 bg-[#111A2E] border border-slate-700 rounded-xl p-3.5">
+      <div class="text-[11px] font-mono text-slate-400 mb-1">01 / CLIENT ENDPOINT</div>
+      <div class="font-semibold text-white text-sm">用户终端设备</div>
+      <div class="text-slate-300 mt-1">{brand.clientMode}</div>
+      <div class="text-[11px] font-mono text-sky-300 mt-1.5">
+        {brand.protocols.join(' · ')}
+      </div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="hidden md:flex justify-center text-slate-500 font-mono">───▶</div>
+
+    <!-- Node 2: Ingress & Backbone -->
+    <div class="md:col-span-2 bg-[#111A2E] rounded-xl p-3.5 border" style={`border-color: ${brand.accentColor}66`}>
+      <div class="text-[11px] font-mono text-slate-400 mb-1">02 / TRANSPORT PATH</div>
+      <div class="font-semibold text-white text-sm">{brand.lineType}</div>
+      <div class="text-slate-300 mt-1">
+        {is专线 ? '内网/跨境专线承载，降低公网高峰期 QoS 抖动' : 'BGP 智能中转或公网多线优化分发'}
+      </div>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="hidden md:flex justify-center text-slate-500 font-mono">═══▶</div>
+
+    <!-- Node 3: Egress -->
+    <div class="md:col-span-1 bg-[#111A2E] border border-slate-700 rounded-xl p-3.5">
+      <div class="text-[11px] font-mono text-slate-400 mb-1">03 / EGRESS</div>
+      <div class="font-semibold text-white text-sm">海外落地节点</div>
+      <div class="text-slate-300 mt-1 line-clamp-2">{brand.nodeRegions.slice(0, 4).join(' · ')}</div>
+    </div>
+  </div>
+
+  <p class="text-[11px] text-slate-400 mt-4 leading-relaxed">
+    拓扑注释：本图根据服务商公开技术参数（{brand.lineType}，协议：{brand.protocols.join(' / ')}）绘制概念示意图；具体物理入口城市与上游 ASN 未经路由追踪前不作主观断言。
+  </p>
+</section>

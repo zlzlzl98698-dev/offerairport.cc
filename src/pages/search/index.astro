@@ -1,0 +1,105 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import { ALL_BRANDS } from '../../data/brands';
+
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: '站内全文搜索', href: '/search/' },
+];
+---
+
+<BaseLayout
+  title="站内中文全文搜索 — 教程、品牌、测速与排障"
+  description={`使用 Pagefind 静态全文索引快速搜索 Clash Verge 教程、报错排查、${ALL_BRANDS.length} 个机场品牌档案与独立评测。`}
+  canonicalUrl="/search/"
+  noindex={true}
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mb-6">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-text-title mb-2">
+        全站中文全文搜索
+      </h1>
+      <p class="text-sm sm:text-base text-text-body">
+        支持搜索 Clash Verge Rev 安装、TUN 模式、节点超时报错、光速云及 {ALL_BRANDS.length} 家品牌数据库内容。
+      </p>
+    </header>
+
+    <div class="rounded-2xl border border-border-subtle bg-white p-4 sm:p-6 shadow-sm">
+      <div id="pagefind-search"></div>
+      <div id="pagefind-fallback" class="hidden text-sm text-text-muted py-4 space-y-2">
+        <p class="font-semibold text-text-title">搜索索引提示</p>
+        <p>
+          Pagefind 全文索引在生产构建（<code class="px-1.5 py-0.5 bg-bg-surface rounded">npm run build</code>）后自动生成于 <code class="px-1.5 py-0.5 bg-bg-surface rounded">/pagefind/</code>。当前如果是本地开发预览，可直接使用下方快捷专题入口。
+        </p>
+      </div>
+    </div>
+
+    <section class="mt-8">
+      <h2 class="text-sm font-bold text-text-title mb-3">常见搜索关键词建议</h2>
+      <div class="flex flex-wrap gap-2 text-xs">
+        {['Clash Verge 下载', 'TUN 模式', '节点超时', '光速云', 'VLESS', '不限时', '跑路预警', 'DNS 防泄漏'].map((kw) => (
+          <a
+            href={`/search/?q=${encodeURIComponent(kw)}`}
+            class="px-3 py-1.5 rounded-xl bg-bg-surface border border-border-subtle text-text-body hover:border-brand-primary hover:text-brand-primary transition-colors"
+          >
+            {kw}
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+<script is:inline>
+  window.addEventListener('DOMContentLoaded', async () => {
+    const container = document.getElementById('pagefind-search');
+    const fallback = document.getElementById('pagefind-fallback');
+    const params = new URLSearchParams(window.location.search);
+    const initialQuery = params.get('q') || '';
+
+    try {
+      const script = document.createElement('script');
+      script.src = '/pagefind/pagefind-ui.js';
+      script.onload = () => {
+        if (window.PagefindUI && container) {
+          new window.PagefindUI({
+            element: '#pagefind-search',
+            showSubResults: true,
+            showImages: false,
+            excerptLength: 28,
+            translations: {
+              placeholder: '输入关键词，例如：Clash Verge 订阅、光速云、Timeout...',
+              clear_search: '清除',
+              load_more: '加载更多结果',
+              search_label: '搜索全站',
+              filters_label: '筛选',
+              zero_results: '未找到与 “[SEARCH_TERM]” 相关的页面，建议精简关键词或前往品牌数据库查找。',
+              many_results: '找到 [COUNT] 条与 “[SEARCH_TERM]” 相关的结果',
+              one_result: '找到 1 条与 “[SEARCH_TERM]” 相关的结果',
+              searching: '正在检索 “[SEARCH_TERM]”...',
+            },
+          });
+          if (initialQuery) {
+            setTimeout(() => {
+              const input = container.querySelector('input');
+              if (input) {
+                input.value = initialQuery;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+            }, 80);
+          }
+        }
+      };
+      script.onerror = () => {
+        fallback?.classList.remove('hidden');
+      };
+      document.head.appendChild(script);
+    } catch {
+      fallback?.classList.remove('hidden');
+    }
+  });
+</script>

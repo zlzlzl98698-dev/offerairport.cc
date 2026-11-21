@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-page: #FFFFFF;
+  --bg-surface: #F7F9FC;
+  --bg-observatory: #0B1220;
+  --bg-observatory-card: #111A2E;
+  --text-title: #172033;
+  --text-body: #334155;
+  --text-muted: #64748B;
+  --brand-primary: #2563EB;
+  --brand-primary-hover: #1D4ED8;
+  --brand-soft: #EFF6FF;
+  --border-subtle: #E5EAF1;
+  --radius-card: 1rem;
+  --radius-btn: 0.75rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-body);
+    font-size: 16px;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      font-size: 17px;
+    }
+  }
+
+  h1, h2, h3, h4 {
+    color: var(--text-title);
+    letter-spacing: -0.015em;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Editorial Prose Styling for Chinese Typography */
+.editorial-prose {
+  color: var(--text-body);
+  font-size: 1rem;
+  line-height: 1.85;
+}
+
+@media (min-width: 768px) {
+  .editorial-prose {
+    font-size: 1.0625rem;
+  }
+}
+
+.editorial-prose h2 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin-top: 2.25rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  scroll-margin-top: 5.5rem;
+}
+
+.editorial-prose h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  scroll-margin-top: 5.5rem;
+}
+
+.editorial-prose p {
+  margin-bottom: 1.15rem;
+}
+
+.editorial-prose ul,
+.editorial-prose ol {
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.editorial-prose li {
+  margin-bottom: 0.45rem;
+}
+
+.editorial-prose a {
+  color: var(--brand-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.editorial-prose a:hover {
+  color: var(--brand-primary-hover);
+}
+
+.editorial-prose pre {
+  background-color: #0F172A;
+  color: #E2E8F0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  margin: 1.25rem 0;
+}
+
+.editorial-prose code:not(pre code) {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-title);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.375rem;
+  font-size: 0.88em;
+}
+
+.editorial-prose table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+  display: block;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  background-color: var(--bg-page);
+}
+
+.editorial-prose th {
+  background-color: var(--bg-surface);
+  color: var(--text-title);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.editorial-prose td {
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+  line-height: 1.65;
+}
+
+.editorial-prose blockquote {
+  background-color: var(--bg-surface);
+  border-left: 4px solid var(--brand-primary);
+  padding: 0.9rem 1.25rem;
+  border-radius: 0 0.75rem 0.75rem 0;
+  margin: 1.25rem 0;
+  color: var(--text-body);
+}
+
+/* Custom subtle card hover */
+.card-elevated {
+  background-color: var(--bg-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-elevated:hover {
+  transform: translateY(-2px);
+  border-color: #CBD5E1;
+  box-shadow: 0 10px 25px -10px rgba(23, 32, 51, 0.08);
+}
+
+/* Pagefind UI theme overrides */
+.pagefind-ui {
+  --pagefind-ui-scale: 1;
+  --pagefind-ui-primary: #2563EB;
+  --pagefind-ui-text: #334155;
+  --pagefind-ui-background: #FFFFFF;
+  --pagefind-ui-border: #E5EAF1;
+  --pagefind-ui-tag: #F7F9FC;
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 12px;
+  --pagefind-ui-font: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}

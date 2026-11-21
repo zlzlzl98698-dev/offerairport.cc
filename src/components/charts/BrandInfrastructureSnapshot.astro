@@ -1,0 +1,53 @@
+---
+import type { BrandRecord } from '../../data/brands/types';
+
+interface Props {
+  brand: BrandRecord;
+}
+
+const { brand } = Astro.props;
+---
+
+<section
+  class="rounded-2xl bg-[#0B1220] text-slate-100 border border-slate-800 p-5 sm:p-6 my-6 shadow-lg"
+  aria-label={`${brand.name} 基础设施参数快照`}
+>
+  <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800/90">
+    <div>
+      <div class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-wider">
+        <span class="w-2 h-2 rounded-full" style={`background-color: ${brand.accentColor}`}></span>
+        <span>Infrastructure Service Snapshot</span>
+      </div>
+      <h3 class="text-lg font-bold text-white mt-1">
+        {brand.name}（{brand.englishName}）核心技术指标快照
+      </h3>
+    </div>
+    <span class="px-2.5 py-1 rounded-full text-xs font-mono bg-slate-800 text-slate-200 border border-slate-700">
+      Verified: {brand.verifiedAt}
+    </span>
+  </div>
+
+  <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-4 text-xs">
+    <div class="bg-[#111A2E] rounded-xl p-3.5 border border-slate-800">
+      <dt class="text-slate-400 font-mono">运营起始 / 状态</dt>
+      <dd class="text-white font-semibold text-sm mt-1">
+        {brand.sinceYear ? `${brand.sinceYear} 年起运营` : '起始年份待核实'}
+      </dd>
+    </div>
+    <div class="bg-[#111A2E] rounded-xl p-3.5 border border-slate-800">
+      <dt class="text-slate-400 font-mono">线路与节点规模</dt>
+      <dd class="text-white font-semibold text-sm mt-1">{brand.lineType}</dd>
+      <dd class="text-slate-400 mt-0.5">{brand.nodeCountLabel}</dd>
+    </div>
+    <div class="bg-[#111A2E] rounded-xl p-3.5 border border-slate-800">
+      <dt class="text-slate-400 font-mono">支持协议与客户端</dt>
+      <dd class="text-white font-semibold text-sm mt-1">{brand.protocols.join(' / ')}</dd>
+      <dd class="text-slate-400 mt-0.5">{brand.clientMode}</dd>
+    </div>
+    <div class="bg-[#111A2E] rounded-xl p-3.5 border border-slate-800">
+      <dt class="text-slate-400 font-mono">设备数与支付方式</dt>
+      <dd class="text-white font-semibold text-sm mt-1">{brand.deviceLimit}</dd>
+      <dd class="text-slate-400 mt-0.5">{brand.paymentMethods.join(' / ')}</dd>
+    </div>
+  </dl>
+</section>

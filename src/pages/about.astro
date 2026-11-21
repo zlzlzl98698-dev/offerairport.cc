@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/common/Breadcrumbs.astro';
+import FaqAccordion from '../components/common/FaqAccordion.astro';
+import { SITE_CONFIG } from '../data/site';
+import { ALL_BRANDS } from '../data/brands';
+import { buildBreadcrumbSchema, buildCanonicalUrl, buildFaqSchema, type FAQItem } from '../utils/seo';
+
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: '关于我们与编辑原则', href: '/about/' },
+];
+
+const aboutFaqs: FAQItem[] = [
+  {
+    question: '机场优选（offerairport.cc）是一个机场服务商，还是第三方独立内容站？',
+    answer:
+      '本站是纯内容导向的中文第三方技术教程、测速归档与品牌资料汇编站点，不自行运营或销售任何机场节点。教程区零商业推广，品牌库与评测对比中涉及的推广合作均会标注 `rel="nofollow sponsored noopener"` 及透明披露。',
+  },
+  {
+    question: '合作推广品牌（如重点完善资料的品牌）会自动排在推荐榜单第一名吗？',
+    answer:
+      '不会。商业合作仅影响部分品牌专页的参数整理优先度与页面推广按钮呈现，绝不会篡改测速图里的 `0B` 失效样本、延迟记录、非晚高峰标识或已知缺陷提示；任何品牌均禁止编造虚假星级评分。',
+  },
+  {
+    question: '如果发现本站某品牌的套餐价格、流量规则或客户端支持情况已经过时或有误，如何申请更正？',
+    answer:
+      '我们会在页面底部与品牌档案中保留「核实日期」与原始差异备注（例如某档案摘要与明细不一致的记录）。发现资料过期时，欢迎携带对应品牌官网截图与变更条款记录通过邮件通道联系编辑部核实修订。',
+  },
+];
+
+const canonical = buildCanonicalUrl('/about/');
+const schemas = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: `关于 ${SITE_CONFIG.name} — 编辑规范与独立审核团队`,
+    url: canonical,
+    inLanguage: 'zh-CN',
+    mainEntity: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.domain,
+      publishingPrinciples: `${SITE_CONFIG.domain}/methodology/`,
+      correctionsPolicy: `${canonical}#corrections`,
+    },
+  },
+  buildFaqSchema(aboutFaqs),
+];
+---
+
+<BaseLayout
+  title="关于我们与单站三分区编辑原则"
+  description="说明机场优选（offerairport.cc）的站点定位、单站三分区隔离制度、内容采编校对分工、信息更正机制与反虚假评测边界。"
+  canonicalUrl="/about/"
+  structuredData={schemas}
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mb-8 pb-6 border-b border-border-subtle space-y-4">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-soft text-brand-primary border border-blue-200">
+        E-E-A-T · 编辑治理与站点说明
+      </span>
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-text-title leading-tight">
+        关于 {SITE_CONFIG.name}（offerairport.cc）与单站三分区原则
+      </h1>
+      <div class="rounded-2xl bg-bg-surface border border-border-subtle p-5 text-sm sm:text-base text-text-body leading-relaxed">
+        <strong class="text-text-title">核心定位说明：</strong>
+        {SITE_CONFIG.name} 不自行出售任何代理服务器或节点订阅，致力于为中文网络工具用户提供<strong>开源客户端操作手册（零商业弹窗）</strong>、<strong>带时间戳的客观对比归档</strong>以及<strong>去伪存真的 {ALL_BRANDS.length} 家品牌资料库</strong>。
+      </div>
+    </header>
+
+    <div class="editorial-prose space-y-8">
+      <section>
+        <h2>一、为什么要建立「单站三分区」严格隔离机制？</h2>
+        <p>
+          中文网络工具领域长期存在两类极端内容痛点：一类是披着开源教程外衣、把「节点超时怎么办」写成推广软文的变相导购页；另一类是把「年付折合 ¥5.6/月」混同于真实月付价、隐藏高倍率扣流或不退款条款的虚假榜单。为避免内容质量与读者信任被商业动机侵蚀，本站全站执行物理层与结构层双重隔离：
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>站点分区</th>
+              <th>覆盖路径与规模</th>
+              <th>商业推广限制</th>
+              <th>核心内容准则</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>纯净教程与排障区</strong></td>
+              <td><code>/clash/*</code>、<code>/guides/*</code>、<code>/resources/*</code></td>
+              <td><strong>强制 0 推广链接、0 购买 CTA</strong></td>
+              <td>全部软件推荐只指向开源或官方商店正版，重点提供哈希校验、DNS 与 TUN 实操</td>
+            </tr>
+            <tr>
+              <td><strong>独立评测与横比区</strong></td>
+              <td><code>/reviews/*</code>、<code>/comparisons/*</code></td>
+              <td>先呈优势/限制与缺失证据，顶部透明披露</td>
+              <td>保留 `0B/s` 异常样本，严格区分「品牌自述」与「实测快照」，绝不排虚高总榜</td>
+            </tr>
+            <tr>
+              <td><strong>透明品牌与档案库</strong></td>
+              <td><code>/brands/*</code>、<code>/offers/</code></td>
+              <td>外部跳转统一加 <code>rel="nofollow sponsored noopener"</code></td>
+              <td>拆分月付实价与年付折算价，未知数据如实标记「待核实/历史存档」</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>二、编辑团队分工与实操核验职责</h2>
+        <ul>
+          <li><strong>客户端与安全校验组</strong>：跟踪 Windows、macOS、Linux、Android、iOS 及 OpenWrt 活跃开源项目变更（如停更 CFW 的替代迁移、NekoBox Play 商店接管风险警告、Nikki 对 OpenWrt 24.10+ 的版本门槛），确保所有安装包指引均配有 SHA256 或官方商店验证路径。</li>
+          <li><strong>测速归档与条款审计组</strong>：交叉核对品牌套餐历史版本差异（例如同份档案中摘要与明细流量差异、优惠码排斥条款、非晚高峰测试局限），对缺失官方文档或仅存截图的品牌一律降级为 `partial` 或 `historical` 状态。</li>
+          <li><strong>内容质量与反误导校对</strong>：全站禁用“全网最快”“绝对稳定”等夸大措辞，拒绝虚构 `4.9/5` 虚假用户评分。</li>
+        </ul>
+      </section>
+
+      <section id="corrections">
+        <h2>三、信息纠错、数据更新与联系机制</h2>
+        <p>
+          代理协议、客户端版本号与服务商套餐条款变化极快，我们按月复检重点资料并标注每篇文章与品牌档案的最后核实日期。如您发现以下情形，欢迎通过公开更正机制联系编辑团队（<code>contact@offerairport.cc</code>，仅受理信息核实与版权/合规反馈）：
+        </p>
+        <ul>
+          <li>某品牌已下线旧套餐、变更客户端支持模式（如从支持 Clash 改为仅限专属客户端），或官网域名发生官方认证迁移。</li>
+          <li>某开源客户端作者变更仓库地址、停止维护或发布重要安全通告。</li>
+          <li>本站页面中任何命令参数、YAML 示例或数据引用存在笔误。</li>
+        </ul>
+      </section>
+    </div>
+
+    <FaqAccordion title="关于编辑团队的常见问询" faqs={aboutFaqs} />
+  </div>
+</BaseLayout>

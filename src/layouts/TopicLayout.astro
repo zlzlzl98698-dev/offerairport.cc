@@ -1,0 +1,218 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/common/Breadcrumbs.astro';
+import ArticleCard from '../components/cards/ArticleCard.astro';
+import FaqAccordion from '../components/common/FaqAccordion.astro';
+import { SITE_CONFIG } from '../data/site';
+import { getL2SubtopicGuide } from '../data/l2-subtopic-index';
+import { buildBreadcrumbSchema, buildCanonicalUrl, buildFaqSchema, type BreadcrumbItem, type FAQItem } from '../utils/seo';
+import type { AnyContentEntry } from '../utils/content';
+import type { ClusterDef, SubTopicItem } from '../data/navigation';
+
+interface Props {
+  title: string;
+  description: string;
+  urlPath: string;
+  badgeText?: string;
+  breadcrumbs: BreadcrumbItem[];
+  subtopics?: SubTopicItem[];
+  clusters?: ClusterDef[];
+  featuredEntries?: AnyContentEntry[];
+  latestEntries?: AnyContentEntry[];
+  nextLinks?: { title: string; href: string; desc: string }[];
+  coreQuestions?: { q: string; a: string }[];
+  faqs?: FAQItem[];
+}
+
+const {
+  title,
+  description,
+  urlPath,
+  badgeText = '专题聚合',
+  breadcrumbs,
+  subtopics = [],
+  clusters = [],
+  featuredEntries = [],
+  latestEntries = [],
+  nextLinks = [],
+  coreQuestions = [],
+  faqs = [],
+} = Astro.props;
+
+const guideKey = urlPath.replace(/^\/|\/$/g, '');
+const guide = getL2SubtopicGuide(guideKey);
+const resolvedFaqs: FAQItem[] = faqs.length > 0 ? faqs : guide?.faqs || [];
+
+const schemas: object[] = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: buildCanonicalUrl(urlPath),
+    inLanguage: 'zh-CN',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.domain,
+    },
+  },
+  ...(resolvedFaqs.length > 0 ? [buildFaqSchema(resolvedFaqs)] : []),
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={urlPath}
+  structuredData={schemas}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+
+    <!-- Topic Header -->
+    <header class="rounded-3xl bg-bg-surface border border-border-subtle p-6 sm:p-10 mb-10">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-soft text-brand-primary border border-blue-200 mb-3">
+        {badgeText}
+      </span>
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-text-title leading-tight mb-4">
+        {title}
+      </h1>
+      <p class="text-base sm:text-lg text-text-body leading-relaxed max-w-3xl">
+        {description}
+      </p>
+    </header>
+
+    <!-- Core Questions (GEO Answer-First) -->
+    {coreQuestions.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-xl font-bold text-text-title mb-4">本专题解答的核心问题</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {coreQuestions.map((item) => (
+            <div class="rounded-2xl border border-border-subtle bg-white p-5">
+              <h3 class="text-base font-bold text-text-title mb-2">{item.q}</h3>
+              <p class="text-sm text-text-body leading-relaxed">{item.a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Subtopics Grid (for Primary Hub pages) -->
+    {subtopics.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-xl font-bold text-text-title mb-5">二级专题导航（共 {subtopics.length} 个子栏目）</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {subtopics.map((sub) => (
+            <a
+              href={sub.href}
+              class="card-elevated p-5 flex flex-col justify-between gap-3 group"
+            >
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <h3 class="text-base font-bold text-text-title group-hover:text-brand-primary transition-colors">
+                    {sub.title}
+                  </h3>
+                  <span class="text-xs font-mono text-text-muted">{sub.clusters.length} 集群</span>
+                </div>
+                <p class="text-sm text-text-body leading-relaxed">{sub.description}</p>
+              </div>
+              <span class="text-xs font-semibold text-brand-primary">进入子专题 →</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Tertiary Content Clusters (for Subtopic pages) -->
+    {clusters.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-xl font-bold text-text-title mb-5">三级内容集群规划</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {clusters.map((cluster) => (
+            <div class="card-elevated p-5 flex flex-col justify-between gap-3">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-bg-surface border border-border-subtle text-text-muted">
+                    主关键词：{cluster.primaryKeyword}
+                  </span>
+                  <span class="text-xs font-mono text-text-muted">{cluster.pageType}</span>
+                </div>
+                <h3 class="text-base font-bold text-text-title mb-1.5">{cluster.title}</h3>
+                <p class="text-sm text-text-body leading-relaxed">{cluster.description}</p>
+              </div>
+              <a href={cluster.targetUrl} class="text-xs font-semibold text-brand-primary hover:underline">
+                前往代表文章：{cluster.targetUrl} →
+              </a>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Slot for custom subtopic content -->
+    <div class="mb-10">
+      <slot />
+    </div>
+
+    <!-- Featured Articles -->
+    {featuredEntries.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-xl font-bold text-text-title mb-5">精选代表内容</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {featuredEntries.map((entry) => (
+            <ArticleCard
+              title={entry.data.title}
+              description={entry.data.description}
+              urlPath={entry.data.urlPath}
+              pageType={entry.data.pageType}
+              category={entry.data.category}
+              pubDate={entry.data.pubDate}
+              updatedDate={entry.data.updatedDate}
+              body={entry.body}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Latest Articles -->
+    {latestEntries.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-xl font-bold text-text-title mb-5">最新收录与更新</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {latestEntries.map((entry) => (
+            <ArticleCard
+              title={entry.data.title}
+              description={entry.data.description}
+              urlPath={entry.data.urlPath}
+              pageType={entry.data.pageType}
+              category={entry.data.category}
+              pubDate={entry.data.pubDate}
+              updatedDate={entry.data.updatedDate}
+              body={entry.body}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Next Steps -->
+    {nextLinks.length > 0 && (
+      <section class="rounded-2xl bg-bg-surface border border-border-subtle p-6" data-pagefind-ignore>
+        <h2 class="text-base font-bold text-text-title mb-4">下一步推荐阅读</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {nextLinks.map((lnk) => (
+            <a href={lnk.href} class="rounded-xl bg-white border border-border-subtle p-4 hover:border-brand-primary transition-colors">
+              <div class="text-sm font-semibold text-text-title mb-1">{lnk.title}</div>
+              <div class="text-xs text-text-muted">{lnk.desc}</div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <FaqAccordion title={`${subtopics.length > 0 ? '专题导览' : '本子专题'}常见问答 FAQ`} faqs={resolvedFaqs} />
+  </div>
+</BaseLayout>

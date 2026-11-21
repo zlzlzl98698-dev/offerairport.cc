@@ -1,0 +1,785 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import TableOfContents from '../../components/common/TableOfContents.astro';
+import AffiliateDisclosure from '../../components/commercial/AffiliateDisclosure.astro';
+import RegistrationButton from '../../components/commercial/RegistrationButton.astro';
+import ArticleCard from '../../components/cards/ArticleCard.astro';
+import { getNavHub } from '../../data/navigation';
+import { getBrandBySlug } from '../../data/brands';
+import { getAllPublishedContent } from '../../utils/content';
+import { SITE_CONFIG } from '../../data/site';
+import { buildBreadcrumbSchema, buildCanonicalUrl } from '../../utils/seo';
+import {
+  AIRPORT_CORE_COMPARE_ROWS,
+  AIRPORT_ONETIME_COMPARE_ROWS,
+  AIRPORT_ANNUAL_BUDGET_ROWS,
+  AIRPORT_BRAND_DIGESTS,
+  AIRPORT_DECISION_BRANCHES,
+  AIRPORT_HUB_FAQS,
+  AIRPORT_INTERNAL_CLUSTER_LINKS,
+} from '../../data/airport-hub-upgrade';
+
+const hub = getNavHub('airport');
+const urlPath = hub.href;
+const title = `${hub.title}专题 — 独立选型、套餐对比与线路评估`;
+const description =
+  '围绕 32 家机场品牌审计与 2026-08-11 实测截图档案的独立选型总指南：拆分真实月付价与年付折算月均价、对比 IEPL/IPLC 专线与客户端兼容性、盘点一次性不限时流量包与 5.6 元同质化风险，并提供可核查的品牌档案与决策分支。';
+
+const verifiedDate = '2026-11-20';
+
+const all = await getAllPublishedContent();
+const relevant = all.filter(
+  (e) =>
+    e.data.category.includes('机场') ||
+    e.data.urlPath.startsWith('/reviews/') ||
+    e.data.urlPath.startsWith('/comparisons/')
+);
+const featured = relevant.filter((e) => e.data.featured).slice(0, 4);
+
+const showcaseSlugs = ['guangsuyun', 'weitu', 'yifan', 'xingdaomeng', 'ermao', 'feimao'];
+const showcaseBrands = showcaseSlugs
+  .map((s) => getBrandBySlug(s))
+  .filter((b): b is NonNullable<typeof b> => Boolean(b));
+
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: hub.title, href: urlPath },
+];
+
+const headings = [
+  { depth: 2, slug: 'core-candidates-table', text: '一、主流候选机场核心对比总表（月付实价与年付折算拆分）' },
+  { depth: 3, slug: 'onetime-plans-compare', text: '分项对比表 A：一次性不过期不限时流量包横向对比' },
+  { depth: 3, slug: 'budget-annual-audit', text: '分项对比表 B：百元以内年付小包及 5.6 元同质化集群审计' },
+  { depth: 2, slug: 'brand-digests', text: '二、重点候选服务集中解析与适用边界（逐家对照）' },
+  { depth: 2, slug: 'pricing-and-metrics', text: '三、决定体验与实际支出的四大技术与计费原理' },
+  { depth: 3, slug: 'amortized-vs-monthly', text: '1. 年付折算均价陷阱与节点流量倍率规则' },
+  { depth: 3, slug: 'speedtest-reading-rules', text: '2. 如何科学读懂 2026-08-11 测速截图档案（勿迷信单张高跑分）' },
+  { depth: 3, slug: 'line-and-client-boundary', text: '3. IEPL / IPLC 专线与专属客户端 vs 第三方通用订阅取舍' },
+  { depth: 2, slug: 'ai-failover-and-risk', text: '四、AI 办公解锁、独享原生 IP 边界与双活容灾实战' },
+  { depth: 2, slug: 'decision-paths', text: '五、按预算、用途与风险承受能力的五条决策分支' },
+  { depth: 2, slug: 'brand-cards', text: '六、核心候选查看套餐卡片与 7 个二级子栏目导航' },
+  { depth: 2, slug: 'data-sources-and-gaps', text: '七、资料来源、待核实 / 历史存档清单与透明度边界' },
+  { depth: 2, slug: 'faq', text: '八、机场推荐与选型高频边界问题 FAQ（9 问）' },
+  { depth: 2, slug: 'related-clusters', text: '九、站内对比集群、深度评测与风控阅读导航' },
+];
+
+const schemas = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: buildCanonicalUrl(urlPath),
+    inLanguage: 'zh-CN',
+    dateModified: verifiedDate,
+    author: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.author,
+    },
+    isPartOf: {
+      '@type': 'WebSite',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.domain,
+    },
+    hasPart: hub.subtopics.map((s) => ({
+      '@type': 'CollectionPage',
+      name: s.title,
+      url: buildCanonicalUrl(s.href),
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: AIRPORT_HUB_FAQS.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.answer,
+      },
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={urlPath}
+  ogType="article"
+  author={SITE_CONFIG.author}
+  publishDate="2026-10-15T00:00:00Z"
+  modifiedDate={`${verifiedDate}T18:55:00+08:00`}
+  tags={['机场推荐', '性价比机场', '稳定机场', '便宜机场', 'IEPL专线', '不限时流量包', '机场排行']}
+  structuredData={schemas}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Main Monograph Article Column -->
+      <article class="lg:col-span-8 min-w-0 space-y-10" data-pagefind-body>
+        <!-- Header & Answer-First Executive Summary -->
+        <header class="rounded-3xl bg-bg-surface border border-border-subtle p-6 sm:p-8 space-y-5">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="px-2.5 py-1 rounded-full bg-brand-soft text-brand-primary border border-blue-200 font-semibold">
+              一级导航专题 ① · 商业评测与独立选型区
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-white text-text-title border border-border-subtle font-mono">
+              最近核实：2026-10-19 / 页面更新：{verifiedDate}
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-medium">
+              含合作推广返佣披露 · 先测后付原则
+            </span>
+          </div>
+
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-text-title tracking-tight leading-tight">
+            {title}
+          </h1>
+
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            挑选跨境代理服务（俗称“机场”）最容易踩的两类坑，一是把商家宣传的“¥5.6/月”或“¥8/月”当成真的可以按单月买，点进去才发现是一次性年付小包折算均价；二是仅凭单张白天测速高跑分就盲目囤两三年会员，忽略了晚高峰跨网丢包、专属客户端锁死以及运营周期短的风险。本页面汇总本站 32 家品牌审计数据库与 2026-08-11 实测截图档案，先给出明确候选结论，再拆分计费陷阱与场景决策路线。
+          </p>
+
+          <AffiliateDisclosure compact extraNote={SITE_CONFIG.vendorDataDisclaimer} />
+
+          <!-- Answer-First Direct Candidates & Conclusion Box -->
+          <div class="rounded-2xl bg-white border border-blue-200 p-5 space-y-3 shadow-xs">
+            <div class="flex items-center gap-2 text-sm font-bold text-brand-primary">
+              <span>直接选购结论（先看核心候选，再查细表）</span>
+            </div>
+            <ul class="space-y-2 text-sm text-text-body leading-relaxed list-disc pl-5">
+              <li>
+                <strong>20 元左右主流月付均衡主力（最稳起步）：</strong>重视 2020 年老牌运营与 12 国节点选 <strong>光速云</strong>（真实月付 ¥25/168GB，支持自研+Clash）；看重 ¥20 内高性价比 1 倍率 Trojan 选 <strong>唯兔云</strong>（¥19.9/150GB）；需要 Hysteria 2 + VLESS-Reality 三协议切换应对复杂宽带选 <strong>一翻云</strong>（¥20/150GB）；看重 2020 老牌且需韩/东南亚节点选 <strong>星岛梦</strong>（¥25/150GB）。
+              </li>
+              <li>
+                <strong>极低频备用 / 一次性不过期流量包（百元灾备）：</strong>只推荐选择<strong>支持 Clash 第三方订阅</strong>的百元档，便于挂载双活备用：<strong>光速云·致敬斯诺克 147 永久版</strong>（¥147/247GB，约 ¥0.595/GB）、<strong>唯兔云</strong>（¥100/100GB 或 ¥160/200GB）、<strong>二猫云</strong>（¥99/100GB）、<strong>一翻云</strong>（¥100/100GB）、<strong>星岛梦</strong>（¥100/100GB）。
+              </li>
+              <li>
+                <strong>完全不想折腾 Clash 的新手专属客户端派：</strong>可对比 <strong>飞猫云</strong>（¥25/150GB 或学生版 ¥84/年）或 <strong>Firefly 萤火虫</strong>（IPLC 原生 IP，¥25/150GB），但必须提前清楚此类“仅专属客户端”服务<strong>无法导入 OpenWrt 软路由与 Clash Verge Rev</strong>。
+              </li>
+              <li>
+                <strong>新人避坑铁律：</strong>第一家服务<strong>坚决不直接买年付</strong>，先买 1 个月真实月付在晚间 20:30–23:00 实测本地电信/联通/移动宽带表现；高度同质化的 <strong>¥5.6/月集群（大佬云/闪电鼠/云界线/榴莲云/环球梯）</strong> 及 <strong>待核实/历史存档品牌（宇宙云/灵动云/浪网/EdgeNova/快狸）</strong> 不宜作为唯一主力依赖。
+              </li>
+            </ul>
+            <div class="pt-1 flex flex-wrap gap-2.5 text-xs">
+              <a
+                href="#core-candidates-table"
+                class="px-3.5 py-2 rounded-xl bg-brand-primary text-white font-semibold hover:bg-brand-primary-hover transition-colors"
+              >
+                对比核心候选月付/年付表
+              </a>
+              <a
+                href="#brand-cards"
+                class="px-3.5 py-2 rounded-xl bg-bg-surface text-text-title border border-border-subtle font-semibold hover:border-brand-primary transition-colors"
+              >
+                直达品牌套餐与官网卡片
+              </a>
+              <a
+                href="/brands/"
+                class="px-3.5 py-2 rounded-xl bg-bg-surface text-text-title border border-border-subtle font-semibold hover:border-brand-primary transition-colors"
+              >
+                打开 32 家交互筛选库
+              </a>
+            </div>
+          </div>
+
+          <!-- Mobile Collapsible TOC -->
+          <div class="lg:hidden">
+            <details class="rounded-2xl border border-border-subtle bg-white p-4">
+              <summary class="text-sm font-bold text-text-title cursor-pointer flex items-center justify-between">
+                <span>本页完整章节目录（共 9 章）</span>
+                <span class="text-xs font-normal text-brand-primary">点击展开</span>
+              </summary>
+              <nav class="mt-3 space-y-1.5 text-xs border-t border-border-subtle pt-3">
+                {headings.map((h) => (
+                  <a
+                    href={`#${h.slug}`}
+                    class:list={[
+                      'block py-1 hover:text-brand-primary transition-colors',
+                      h.depth === 2 ? 'font-semibold text-text-title' : 'pl-3 text-text-muted',
+                    ]}
+                  >
+                    {h.text}
+                  </a>
+                ))}
+              </nav>
+            </details>
+          </div>
+        </header>
+
+        <!-- Section 1: Core Comparison Table + 2 Sub-Tables -->
+        <section id="core-candidates-table" class="scroll-mt-24 space-y-6">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            一、主流候选机场核心对比总表（月付实价与年付折算拆分）
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            为避免价格宣传误导，下表统一采用人民币（¥）标价，强制将<strong>可单独按月购买的真实月付起步价</strong>与<strong>需一次性预付全年的年付折算月均价</strong>分成两列呈现，同时原样写明设备限制、倍率标注、客户端兼容方式、AI 解锁态度及实测档案来源。缺失字段明确标示为待核实，不做跨品牌猜测填充。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 1：主流候选机场月付实价、年付折算与接入矩阵（10 家）</span>
+              <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[620px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-bold w-[17%]">品牌与起步</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[28%]">月付实价 vs 年付折算</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">线路、协议与倍率设备</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[29%]">AI / 实测与使用限制</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-text-body">
+                  {AIRPORT_CORE_COMPARE_ROWS.map((row) => (
+                    <tr class="hover:bg-slate-50/70 align-top">
+                      <td class="p-3 sm:p-3.5 leading-relaxed">
+                        <a href={`/brands/${row.slug}/`} class="font-bold text-brand-primary hover:underline text-sm">
+                          {row.name}
+                        </a>
+                        <span class="block text-[11px] text-text-muted mt-0.5">起于 {row.sinceYear}</span>
+                        <span class="inline-block mt-1.5 px-2 py-0.5 rounded-md bg-bg-surface border border-border-subtle text-[11px] text-text-title">
+                          {row.clientMode.includes('仅官方专属') ? '仅专属端' : row.clientMode.includes('自研') ? '自研+第三方' : '第三方订阅'}
+                        </span>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div class="font-medium text-text-title">
+                          <span class="text-brand-primary font-semibold">月付：</span>{row.realMonthlyStart}
+                        </div>
+                        <div class="text-xs text-text-body">
+                          <span class="text-text-muted font-semibold">年付：</span>{row.annualAmortized}
+                        </div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div>{row.lineAndProtocols}</div>
+                        <div class="text-xs text-text-muted">{row.multiplierAndDevices}</div>
+                        <div class="text-xs text-text-muted">接入：{row.clientMode}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div>{row.aiAndVerification}</div>
+                        <div class="text-xs text-text-muted">{row.limitsAndSource}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 id="onetime-plans-compare" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            分项对比表 A：一次性不过期不限时流量包横向对比
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            对于每月消耗低于 15GB 的轻度资料查询用户，或需要配置第二家“永不清零热备线路”来防范主力机场维护断流的用户，百元级一次性不限时包能大幅降低年度固定支出。需注意：作为灾备放进 Clash 自动切换组（Fallback）的前提是该品牌<strong>必须提供第三方通用订阅</strong>。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 2：一次性不限时流量包成本与 Clash 兼容性对比</span>
+              <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[600px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-bold w-[24%]">品牌与套餐名</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[22%]">实付 / 买断流量</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[24%]">客户端兼容性</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[30%]">核心选型提示</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-text-body">
+                  {AIRPORT_ONETIME_COMPARE_ROWS.map((row) => (
+                    <tr class="hover:bg-slate-50/70 align-top">
+                      <td class="p-3 sm:p-3.5 leading-relaxed">
+                        <a href={`/brands/${row.slug}/`} class="font-bold text-brand-primary hover:underline text-sm">
+                          {row.brand}
+                        </a>
+                        <span class="block text-xs text-text-muted mt-0.5">{row.planName}</span>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1">
+                        <div class="font-semibold text-text-title">{row.oneTimePrice} · {row.totalTraffic}</div>
+                        <span class="inline-block px-2 py-0.5 rounded-md bg-brand-soft text-brand-primary font-semibold text-[11px]">
+                          折合 {row.unitCost}
+                        </span>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.clientCompat}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.note}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 id="budget-annual-audit" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            分项对比表 B：百元以内年付小包及 5.6 元同质化集群审计
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            搜索“便宜机场”时最常见的就是月均 5.6 元至 8 元的年付轻量包。下表把经过实测存档验证的年付入门档与存在高度模板雷同的 5.6 元集群并排对照，避免你因为仅看一个“5.6 元/月”标题而承担过高的不确定风险。详见
+            <a href="/comparisons/cheap-annual-airports-audit/" class="text-brand-primary font-semibold hover:underline">5.6–8 元年付入门档完整审计报告</a>。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 3：年付入门档与 5.6 元同质化集群横排审计</span>
+              <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[600px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-bold w-[24%]">品牌 / 套餐档位</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[23%]">年付实付 / 折算 / 流量</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[22%]">线路协议与接入</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[31%]">审计结论与主要限制</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-text-body">
+                  {AIRPORT_ANNUAL_BUDGET_ROWS.map((row) => (
+                    <tr class="hover:bg-slate-50/70 align-top">
+                      <td class="p-3 sm:p-3.5 font-bold text-text-title leading-relaxed">
+                        {row.slug ? (
+                          <a href={`/brands/${row.slug}/`} class="text-brand-primary hover:underline">
+                            {row.brand}
+                          </a>
+                        ) : (
+                          row.brand
+                        )}
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1">
+                        <div class="font-semibold text-text-title">{row.annualPrice}（折 {row.amortizedMonthly}）</div>
+                        <div class="text-xs text-text-muted">每月额度：{row.monthlyQuota}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1">
+                        <div>{row.protocolAndLine}</div>
+                        <div class="text-xs text-text-muted">{row.clientMode}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.auditStatus}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Centralized Per-Brand Digest -->
+        <section id="brand-digests" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            二、重点候选服务集中解析与适用边界（逐家对照）
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            为保证评价客观、避免在文章不同段落反复堆砌同一个品牌名，下面把各核心阵营最具代表性的候选品牌集中逐一说明——明确列清它的推荐依据、适合与不适合人群、完整实付价梯队以及原始文档披露的限制或差异点：
+          </p>
+
+          <div class="space-y-4">
+            {AIRPORT_BRAND_DIGESTS.map((item) => (
+              <div class="rounded-2xl border border-border-subtle bg-white p-5 sm:p-6 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <h3 class="text-lg font-bold text-text-title">
+                    <a href={`/brands/${item.slug}/`} class="hover:text-brand-primary transition-colors">
+                      {item.name}
+                    </a>
+                  </h3>
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-soft text-brand-primary border border-blue-200">
+                    {item.positioningTag}
+                  </span>
+                </div>
+                <div class="space-y-2 text-sm text-text-body leading-relaxed">
+                  <p>
+                    <strong>推荐依据：</strong>{item.recommendationBasis}
+                  </p>
+                  <p>
+                    <strong>适合人群：</strong>{item.suitableFor}
+                  </p>
+                  <p>
+                    <strong>不适合人群：</strong>{item.notSuitableFor}
+                  </p>
+                  <p>
+                    <strong>真实费用与梯队：</strong>{item.pricingBreakdown}
+                  </p>
+                  <p class="text-xs text-amber-900 bg-amber-50/70 border border-amber-200 rounded-xl p-3">
+                    <strong>限制与资料差异说明：</strong>{item.keyLimitsAndDiscrepancies}
+                  </p>
+                </div>
+                <div class="pt-1 flex flex-wrap gap-3 text-xs">
+                  <a href={`/brands/${item.slug}/`} class="font-semibold text-brand-primary hover:underline">
+                    进入 {item.name} 完整档案与测速截图 →
+                  </a>
+                  <a href="#brand-cards" class="text-text-muted hover:text-brand-primary">
+                    跳至下方转换卡片查看官网入口 ↓
+                  </a>
+                  {item.reviewHref && (
+                    <a href={item.reviewHref} class="text-text-muted hover:text-brand-primary">
+                      阅读独立长文评测 →
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Section 3: Technical & Billing Principles -->
+        <section id="pricing-and-metrics" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            三、决定体验与实际支出的四大技术与计费原理
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            在机场市场中，表面标价和真实使用成本之间往往藏着四道隐形门槛：计费周期拆算、节点扣流倍率、测速截图时段与工具差异、以及专线与客户端生态。在付款之前弄懂这四点，足以帮绝大多数新手挡掉 90% 的非理性消费。
+          </p>
+
+          <h3 id="amortized-vs-monthly" class="text-lg sm:text-xl font-bold text-text-title pt-1">
+            1. 年付折算均价陷阱与节点流量倍率规则
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            市面上大多数声称“每月只要 5–8 元”的宣传海报，背后全部对应着“年付小包 ÷ 12 个月”的折算数字。这类套餐有两个刚性限制容易被忽略：第一，它要求你在完全没测过本地晚高峰质量的前提下一次性拿出 ¥79–¥137，且包括光速云轻量版、Firefly 年付版、闪跃年付版在内的大多数品牌均明确标注<strong>年付特价小包不参与新人优惠码、且不支持中途退款</strong>；第二，小包每月的流量配额普遍只有 40GB–69GB，对于每天刷高清 1080P/4K 流媒体或同步工程大包的用户，不到月中就会耗尽重置额度。相比之下，¥19.9–¥25 真实月付档不仅允许随时止损，还一口气给足 130GB–168GB 月流量（单 GB 成本约 ¥0.13–¥0.17/GB）。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            另一个直接决定流量耐不耐用的参数是<strong>节点倍率</strong>。假设你的账户买的是 150GB 月付套餐，如果选用了一条标着 <code>×2</code> 或 <code>×5</code> 的冷门原生节点看 4K 视频，实际跑掉 10GB 就会在后台扣除 20GB 至 50GB。因此在对比同价位服务时，必须优先关注明确写明“全线 1 倍流量（如星岛梦、唯兔云、灵猫网络、无忧链接）”的产品，或在 Clash 客户端里避开高倍率节点组。有关倍率、重置日与流量异常扣费自查，可阅读
+            <a href="/resources/subscription-traffic-leak-fix/" class="text-brand-primary font-semibold hover:underline">订阅流量偷跑与倍率异常排查指南</a>。
+          </p>
+
+          <h3 id="speedtest-reading-rules" class="text-lg sm:text-xl font-bold text-text-title pt-1">
+            2. 如何科学读懂 2026-08-11 测速截图档案（勿迷信单张高跑分）
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            很多评测网站喜欢给 15 家机场强行排出一个“第 1 名到第 15 名总分榜”，但这种做法在工程上极不严谨。以本站完整归档的 <strong>2026-08-11 批次测速实测截图</strong>为例，其中既包含 00:21 凌晨测的一翻云、01:48 测的星岛梦，也包含 13:55–15:50 午后测的唯兔云与光速云，以及真正压在晚间 21:04–22:46 高峰后段测的宇宙云、U1S1 与极连云；更关键的是测试前端并不完全相同——宇宙云与快狸跑在 9Gbps 喵速（VLESS）后端，其余品牌跑在 5Gbps 珠海联通 MAI-TEST-BOT（Shadowsocks）32 线程后端。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            正确利用测速图的姿势，不是看哪家最高单线程峰值偶尔摸到了 500Mbps，而是重点查看三项硬指标：1）在相同工具下，晚间时段（18:45–22:46）是否仍保持大片绿条而非满屏红色 Timeout 或 0B 失效节点；2）测试时所采用的协议（如截图中显示 Shadowsocks 还是 VLESS）与品牌最新文档标注是否衔接；3）不要把宽带千兆测试机在午后跑出的 547Mbps 直接等价于你自家晚上 21 点手机 Wi-Fi 下的实际体感。详细图文解读方法见
+            <a href="/comparisons/2026-airport-speedtest-benchmark/" class="text-brand-primary font-semibold hover:underline">2026-08-11 批次测速档案横向对照</a> 与
+            <a href="/resources/how-to-test-nodes/" class="text-brand-primary font-semibold hover:underline">科学看懂测速图各列数据指南</a>。
+          </p>
+
+          <h3 id="line-and-client-boundary" class="text-lg sm:text-xl font-bold text-text-title pt-1">
+            3. IEPL / IPLC 专线与专属客户端 vs 第三方通用订阅取舍
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            截至当前，主流 ¥18–¥27 月付档位已经非常普及 <strong>IEPL（国际以太网专线）</strong> 或 <strong>IPLC（国际专线）</strong>，相比早期纯走公网直连或普通 BGP 中转的机场，它们在晚间 20:00–23:00 避开公共国际出口 QoS 拥堵的能力显著更强。不过要注意“专线并不是零故障免死金牌”——你当地运营商连向国内入口机房（沪/广/深 BGP）的跨网质量，以及服务商在单条专线上的超售控制，同样决定实际稳定度。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            另一方面，2026 年下半年行业出现了一项明显分化：<strong>一类品牌</strong>（光速云、唯兔云、一翻云、星岛梦、二猫云、微风网络、速界、可信云）坚持保留标准 Clash / Mihomo / Shadowrocket 通用订阅链接；<strong>另一类品牌</strong>（飞猫云、Firefly 萤火虫、无忧链接、SOGO 云、全球云、灵猫网络、隐形人）则转向只提供官方定制专属客户端，禁止导出订阅。对于普通电脑手机轻用用户，专属客户端确实降低了配置难度；但对使用 OpenWrt 软路由、Linux 终端、习惯自己写 AI 规则覆写或需要把两家机场合并在 Clash Verge Rev 里自动容灾的进阶用户来说，失去通用订阅就意味着完全失去了生态控制力。深度利弊评估见
+            <a href="/comparisons/custom-app-vs-universal-client/" class="text-brand-primary font-semibold hover:underline">专属定制客户端 vs 通用 Clash 客户端对比</a>。
+          </p>
+        </section>
+
+        <!-- Section 4: AI Unlock, Dedicated IP & Failover -->
+        <section id="ai-failover-and-risk" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            四、AI 办公解锁、独享原生 IP 边界与双活容灾实战
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            如今大量用户购买机场的核心刚需已经从纯看视频转向了每天高频调用 <strong>ChatGPT、Claude、Gemini、Cursor</strong> 等海外 AI 工具。选型时务必要破除一个商家文案制造的幻想：<strong>没有任何 ¥20–¥30 档的共享机场能够做到“所有地区节点永久 100% 稳定解锁所有 AI 服务”</strong>。最直接的例子是香港节点——OpenAI 与 Anthropic 从政策层面就不向香港地区开放，因此哪怕你买了顶配香港 IEPL 专线，直接连香港节点打开 ChatGPT 照样报错，必须切到新加坡、日本、台湾或美国可用落地节点。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            更严谨的态度是像 <strong>速界</strong>（重点主打 AI 场景但明确提示受 IP 与平台规则影响不做永久稳定空头保证）、<strong>光速云</strong>（明示 Claude 支持而 ChatGPT/Gemini 需切特定节点）或 <strong>可信云</strong>（直接标注 AI 与流媒体缺乏统一实测）那样看清边界，配合支持第三方订阅的客户端在本地写一条 AI 规则覆写，强制让所有 AI 域名锁定在固定一条干净美/日/新节点上，既防止香港节点报错，也避免自动测速频繁换 IP 触发账号风控锁定。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            而如果你的需求更进一步——涉及 <strong>Amazon / Shopify 跨境电商店铺后台、TikTok 直播带货或海外金融银行资金账户</strong>，请绝对远离数十元级别的共享大众机场，因为百人共用的出口 IP 只要有一个账号违规就会引发整批连坐风控。此场景应当评估 <strong>光速云 ¥680/月 定制独享原生 IP</strong> 或 <strong>暮光加速 ¥600/月 独享私人节点</strong> 等独立资源方案。至于普通工作党想要“哪怕某天主力机场线路临时维护也能一秒不停机”，最成熟的方案并不是押宝一家“号称 100% 永不掉线”的神话机场，而是花二十几元选一家主力包月机场，再花百元买一套支持 Clash 的一次性不限时包（如光速云 147 / 唯兔云 100G / 二猫云 99 元）放进 <code>Fallback</code> 故障转移策略组里做自动双活接管。实操步骤请看
+            <a href="/guides/multi-airport-failover-strategy/" class="text-brand-primary font-semibold hover:underline">主力 + 备用双活容灾配置实战</a>。
+          </p>
+        </section>
+
+        <!-- Section 5: 5 Decision Branches -->
+        <section id="decision-paths" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            五、按预算、用途与风险承受能力的五条决策分支
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            如果你已经看到这里，仍希望直接把所有比较浓缩成“我是哪类人、该怎么下单、先走哪一步”，请对照下方五条决策路径直接对号入座：
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {AIRPORT_DECISION_BRANCHES.map((branch) => (
+              <div class="rounded-2xl border border-border-subtle bg-white p-5 flex flex-col justify-between gap-4">
+                <div class="space-y-2.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-soft text-brand-primary border border-blue-200">
+                      {branch.badge}
+                    </span>
+                  </div>
+                  <h3 class="text-base font-bold text-text-title leading-snug">{branch.title}</h3>
+                  <p class="text-xs text-text-body leading-relaxed">
+                    <strong>适用前提：</strong>{branch.condition}
+                  </p>
+                  <p class="text-xs text-text-body leading-relaxed">
+                    <strong>推荐配置：</strong>{branch.recommendation}
+                  </p>
+                  <p class="text-xs text-amber-800 bg-amber-50/70 border border-amber-200 rounded-xl p-2.5 leading-relaxed">
+                    <strong>避坑红线：</strong>{branch.avoid}
+                  </p>
+                  <ol class="text-xs text-text-body space-y-1 list-decimal pl-4 leading-relaxed">
+                    {branch.steps.map((s) => (
+                      <li>{s}</li>
+                    ))}
+                  </ol>
+                </div>
+                <a
+                  href={branch.href}
+                  class="inline-flex items-center justify-center px-3.5 py-2 rounded-xl bg-bg-surface border border-border-subtle text-xs font-semibold text-brand-primary hover:border-brand-primary transition-colors"
+                >
+                  {branch.ctaText} →
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Section 6: Commercial Action Cards & 7 Subtopics Navigation -->
+        <section id="brand-cards" class="scroll-mt-24 space-y-6">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            六、核心候选查看套餐卡片与 7 个二级子栏目导航
+          </h2>
+
+          <AffiliateDisclosure extraNote="下方 6 张代表候选卡片均对应本站已建档服务商。点击「了解详情」可查看完整各档位价目表、原始测速图集与风险核对笔记；点击「查看套餐与官网入口」将附带推广关系跳转官网，不影响你的实际支付价格。" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {showcaseBrands.map((brand) => (
+              <div class="rounded-2xl border border-border-subtle bg-white p-5 flex flex-col justify-between gap-4 shadow-xs">
+                <div class="space-y-3">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                      {brand.logo ? (
+                        <img
+                          src={brand.logo}
+                          alt={`${brand.name} 官方图标`}
+                          width="44"
+                          height="44"
+                          loading="lazy"
+                          class="w-11 h-11 rounded-xl object-contain bg-bg-surface border border-border-subtle p-1 shrink-0"
+                        />
+                      ) : (
+                        <div
+                          class="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
+                          style={`background-color: ${brand.accentColor}`}
+                        >
+                          {brand.name.slice(0, 2)}
+                        </div>
+                      )}
+                      <div class="min-w-0">
+                        <h3 class="text-base font-bold text-text-title truncate">
+                          <a href={`/brands/${brand.slug}/`} class="hover:text-brand-primary transition-colors">
+                            {brand.name}（{brand.englishName}）
+                          </a>
+                        </h3>
+                        <p class="text-xs text-text-muted truncate">
+                          {brand.sinceYear ? `${brand.sinceYear} 年起运营` : '运营年待核实'} · 核实日期：{brand.verifiedAt}
+                        </p>
+                      </div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                      {brand.clientMode === '仅专属客户端（无通用订阅）' ? '专属客户端' : '支持第三方订阅'}
+                    </span>
+                  </div>
+
+                  <p class="text-xs text-text-body leading-relaxed">{brand.summary}</p>
+
+                  <div class="rounded-xl bg-bg-surface border border-border-subtle p-3 space-y-1.5 text-xs">
+                    <div class="flex justify-between gap-2">
+                      <span class="text-text-muted shrink-0">适用人群</span>
+                      <span class="text-text-title font-medium text-right">{brand.suitableFor[0]}</span>
+                    </div>
+                    <div class="flex justify-between gap-2">
+                      <span class="text-text-muted shrink-0">费用结构</span>
+                      <span class="text-text-title font-semibold text-right">{brand.startingMonthlyDisplay}</span>
+                    </div>
+                    <div class="flex justify-between gap-2">
+                      <span class="text-text-muted shrink-0">主要限制</span>
+                      <span class="text-text-body text-right">{brand.cons[0]}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-3 pt-1">
+                  <RegistrationButton brandSlug={brand.slug} label={`查看套餐与 ${brand.name} 官网`} />
+                  <div class="flex items-center justify-between text-xs pt-2 border-t border-border-subtle">
+                    <a
+                      href={`/brands/${brand.slug}/`}
+                      class="font-semibold text-brand-primary hover:underline"
+                    >
+                      了解详情（档案与实测图）→
+                    </a>
+                    {brand.reviewSlug && (
+                      <a
+                        href={`/reviews/${brand.reviewSlug}/`}
+                        class="text-text-muted hover:text-text-title"
+                      >
+                        独立长评 →
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <h3 class="text-base font-bold text-text-title">机场推荐专题二级导航目录（共 {hub.subtopics.length} 个子栏目）</h3>
+              <span class="text-xs text-text-muted">覆盖推荐、排行、性价比、稳定、便宜与基础知识分支</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {hub.subtopics.map((sub) => (
+                <a
+                  href={sub.href}
+                  class="rounded-xl border border-border-subtle bg-white p-4 flex flex-col justify-between gap-2 hover:border-brand-primary transition-colors group"
+                >
+                  <div>
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-sm font-bold text-text-title group-hover:text-brand-primary transition-colors">
+                        {sub.title}
+                      </span>
+                      <span class="text-[11px] text-text-muted shrink-0">{sub.clusters.length} 集群</span>
+                    </div>
+                    <p class="text-xs text-text-muted mt-1 leading-relaxed">{sub.description}</p>
+                  </div>
+                  <span class="text-xs font-semibold text-brand-primary">进入子专题 →</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 7: Data Sources, Gaps & Transparency -->
+        <section id="data-sources-and-gaps" class="scroll-mt-24 space-y-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            七、资料来源、待核实 / 历史存档清单与透明度边界
+          </h2>
+          <div class="rounded-2xl border border-border-subtle bg-white p-5 sm:p-6 space-y-3 text-sm text-text-body leading-relaxed">
+            <p>
+              <strong>核心引用数据来源：</strong>本页全部价目、节点规模、优惠码、协议及测速参数均严格对齐本站收录的原始资料文档：<code>32家机场品牌清单.txt</code>、<code>光速云品牌信息.txt</code>（核实日期 2026-10-19）及 <code>2026-08-11 测速实测资料包</code>（MAI-TEST-BOT 2.0.0-dev 与喵速截图档案）。
+            </p>
+            <p>
+              <strong>当前数据缺口与待核实清单（绝不虚构填充）：</strong>
+              1）<strong>宇宙云、灵动云、浪网、EdgeNova</strong> 仅保留 2026-08 历史存档或残缺信息，缺少最新完整多周期价目表；2）<strong>快狸</strong> 仅存在于 2026-08-11 测速截图资料包中，因缺失完整文字品牌档案未生成推广卡与强推荐；3）<strong>梯子云、极连云、光年梯、可信云、速界</strong> 仅拥有入门单档数据，多档月付/年付矩阵尚待补充；4）所有标注 <code>vendor</code> 的非晚高峰测速速率与“0 丢包”声明均属服务商提供信息，仅作结构参考，用户务必结合本地宽带晚高峰月付实测验收。完整数据审计说明可查阅
+              <a href="/reviews/brand-data-transparency-audit/" class="text-brand-primary font-semibold hover:underline">品牌数据透明度与差异核对审计报告</a>。
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 8: Boundary FAQs -->
+        <section id="faq" class="scroll-mt-24 space-y-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            八、机场推荐与选型高频边界问题 FAQ（9 问）
+          </h2>
+          <div class="space-y-3">
+            {AIRPORT_HUB_FAQS.map((faq) => (
+              <details class="group rounded-2xl border border-border-subtle bg-white p-4 sm:p-5">
+                <summary class="font-semibold text-text-title cursor-pointer flex items-center justify-between gap-3 list-none text-sm sm:text-base">
+                  <span>{faq.question}</span>
+                  <svg class="w-4 h-4 text-text-muted shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                  </svg>
+                </summary>
+                <div class="mt-3 text-sm text-text-body leading-relaxed space-y-2">
+                  <p>{faq.answer}</p>
+                  {faq.anchorHref && faq.anchorLabel && (
+                    <p>
+                      <a href={faq.anchorHref} class="text-xs font-semibold text-brand-primary hover:underline">
+                        对应章节：{faq.anchorLabel} ↑
+                      </a>
+                    </p>
+                  )}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        <!-- Section 9: Internal Topic Clusters & Featured Reviews -->
+        <section id="related-clusters" class="scroll-mt-24 space-y-6" data-pagefind-ignore>
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            九、站内对比集群、深度评测与风控阅读导航
+          </h2>
+          <p class="text-sm text-text-body leading-relaxed">
+            本专题已涵盖主流机场横比、真实月付 vs 年付拆解、不限时备用方案及五类场景决策。需要深入核对特定档位、完整评测或风控预警的读者，请点击下方对应站内专文：
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {AIRPORT_INTERNAL_CLUSTER_LINKS.map((item) => (
+              <a
+                href={item.href}
+                class="card-elevated p-4 flex flex-col justify-between gap-2 group"
+              >
+                <div>
+                  <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium bg-bg-surface text-text-muted border border-border-subtle mb-1.5">
+                    {item.tag}
+                  </span>
+                  <h3 class="text-sm font-bold text-text-title group-hover:text-brand-primary transition-colors">
+                    {item.title}
+                  </h3>
+                  <p class="text-xs text-text-muted mt-1 leading-relaxed">{item.purpose}</p>
+                </div>
+                <span class="text-xs font-semibold text-brand-primary">阅读该页面 →</span>
+              </a>
+            ))}
+          </div>
+
+          {featured.length > 0 && (
+            <div class="space-y-4 pt-2">
+              <h3 class="text-base font-bold text-text-title">精选对比与深度评测文章</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {featured.map((entry) => (
+                  <ArticleCard
+                    title={entry.data.title}
+                    description={entry.data.description}
+                    urlPath={entry.data.urlPath}
+                    pageType={entry.data.pageType}
+                    category={entry.data.category}
+                    pubDate={entry.data.pubDate}
+                    updatedDate={entry.data.updatedDate}
+                    body={entry.body}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      </article>
+
+      <!-- Desktop Sticky Sidebar TOC & Tool Navigation -->
+      <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1" data-pagefind-ignore>
+        <TableOfContents headings={headings} />
+
+        <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5 space-y-3 text-xs">
+          <h2 class="text-sm font-bold text-text-title">选型与配套工具快捷入口</h2>
+          <p class="text-text-body leading-relaxed">
+            按条件直接过滤 32 家建档品牌，或先配好正版开源客户端与测速验收流程：
+          </p>
+          <div class="flex flex-col gap-2">
+            <a
+              href="/brands/"
+              class="px-4 py-2.5 rounded-xl bg-brand-primary text-white font-semibold text-center hover:bg-brand-primary-hover transition-colors"
+            >
+              进入 32 家机场品牌筛选数据库
+            </a>
+            <a
+              href="/offers/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              查看不限时流量包与优惠汇总
+            </a>
+            <a
+              href="/comparisons/budget-18-25-yuan-airports/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              对比 18–25 元主流月付 8 强
+            </a>
+            <a
+              href="/clash/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              前往 Clash 客户端官方获取与配置专题
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

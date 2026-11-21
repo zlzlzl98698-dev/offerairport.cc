@@ -1,0 +1,128 @@
+---
+import type { BrandRecord } from '../../data/brands/types';
+
+interface Props {
+  brand: BrandRecord;
+}
+
+const { brand } = Astro.props;
+const report = brand.speedReport;
+
+const statusBadgeMap = {
+  measured: { label: 'Measured Data', cls: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
+  vendor: { label: 'Vendor Data (Non-Peak)', cls: 'bg-sky-500/15 text-sky-300 border-sky-500/30' },
+  historical: { label: 'Historical Archive', cls: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
+  partial: { label: 'Partial Snapshot', cls: 'bg-slate-500/20 text-slate-300 border-slate-500/30' },
+  untested: { label: 'Not Tested', cls: 'bg-rose-500/15 text-rose-300 border-rose-500/30' },
+};
+
+const badge = report ? statusBadgeMap[report.status] : statusBadgeMap.untested;
+const maxDownload = report?.samples.reduce((m, s) => Math.max(m, s.downloadMbps || 0), 0) || 600;
+
+function getLatencyColor(latencyMs: number | null) {
+  if (latencyMs === null) return 'text-slate-400';
+  if (latencyMs <= 60) return 'text-emerald-400';
+  if (latencyMs <= 120) return 'text-sky-400';
+  return 'text-amber-400';
+}
+---
+
+<section
+  class="rounded-2xl bg-[#0B1220] text-slate-100 border border-slate-800 p-5 sm:p-6 my-6 shadow-lg"
+  aria-label={`${brand.name} 网络性能监控报告`}
+>
+  <div class="flex flex-wrap items-start justify-between gap-3 pb-4 border-b border-slate-800/90">
+    <div>
+      <div class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-wider">
+        <span class="w-2 h-2 rounded-full" style={`background-color: ${brand.accentColor}`}></span>
+        <span>Performance Monitoring Report</span>
+      </div>
+      <h3 class="text-lg font-bold text-white mt-1">
+        {brand.name} 节点延迟与带宽观测记录
+      </h3>
+    </div>
+    <span class={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-mono border ${badge.cls}`}>
+      {badge.label}
+    </span>
+  </div>
+
+  {report ? (
+    <div class="mt-4 space-y-5">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-[#111A2E] rounded-xl p-3.5 border border-slate-800/80">
+        <div>
+          <span class="text-slate-400 block">测试时间与时段</span>
+          <span class="font-mono text-slate-100 mt-0.5 block">{report.testedAt}</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">测试环境 / 工具</span>
+          <span class="text-slate-200 mt-0.5 block">{report.environment}</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">数据来源</span>
+          <span class="text-slate-200 mt-0.5 block">{report.dataSource}</span>
+        </div>
+      </div>
+
+      {report.samples.length > 0 && (
+        <div class="space-y-3">
+          {report.samples.map((sample) => {
+            const pct = sample.downloadMbps ? Math.min(100, Math.round((sample.downloadMbps / maxDownload) * 100)) : 0;
+            const latencyColor = getLatencyColor(sample.latencyMs);
+
+            return (
+              <div class="bg-[#111A2E] rounded-xl p-3.5 border border-slate-800/80">
+                <div class="flex flex-wrap items-center justify-between gap-2 text-sm mb-2">
+                  <span class="font-semibold text-white">{sample.region} 节点群</span>
+                  <div class="flex items-center gap-4 font-mono text-xs">
+                    <span class={latencyColor}>
+                      RTT: {sample.latencyMs !== null ? `${sample.latencyMs} ms` : '待核实'}
+                    </span>
+                    <span class="text-slate-100 font-semibold">
+                      DL: {sample.downloadMbps !== null ? `${sample.downloadMbps} Mbps` : '待核实'}
+                    </span>
+                  </div>
+                </div>
+                <div class="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all"
+                    style={`width: ${pct}%; background-color: ${brand.accentColor};`}
+                  ></div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {report.summaryNote && (
+        <p class="text-xs text-slate-300 leading-relaxed bg-[#111A2E]/70 border border-slate-800 rounded-xl p-3.5">
+          观测注记：{report.summaryNote}
+        </p>
+      )}
+
+      {report.screenshotPath && (
+        <details class="bg-[#111A2E] border border-slate-800 rounded-xl overflow-hidden">
+          <summary class="px-4 py-3 text-xs font-medium text-sky-300 cursor-pointer hover:bg-slate-800/50 flex items-center justify-between">
+            <span>展开原始测速截图档案（{report.screenshotPath.split('/').pop()}）</span>
+            <span class="font-mono text-slate-400">单日快照 · 未裁剪</span>
+          </summary>
+          <div class="p-4 border-t border-slate-800 bg-[#090F1A]">
+            <img
+              src={report.screenshotPath}
+              alt={`${brand.name} 2026-08-11 原始测速截图`}
+              loading="lazy"
+              class="max-w-full h-auto mx-auto rounded-lg border border-slate-800"
+            />
+            <p class="text-[11px] text-slate-400 mt-2.5 leading-relaxed">
+              说明：单日截图仅证明截图所示时间点与测试条件下的结果，不代表长期稳定性、晚高峰保证或 AI/流媒体解锁能力。
+            </p>
+          </div>
+        </details>
+      )}
+    </div>
+  ) : (
+    <div class="mt-4 p-4 rounded-xl bg-[#111A2E] border border-slate-800 text-xs text-slate-300 leading-relaxed">
+      当前数据库尚未收录 {brand.name} 的标准化节点测速数值，Status: <span class="font-mono text-rose-300">Not Tested</span>。我们不以估算数值填充测速面板，建议先购入最低月付或短周期实测当地宽带晚高峰连通性。
+    </div>
+  )}
+</section>

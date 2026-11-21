@@ -1,0 +1,774 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import TableOfContents from '../../components/common/TableOfContents.astro';
+import ArticleCard from '../../components/cards/ArticleCard.astro';
+import { getNavHub } from '../../data/navigation';
+import { getAllPublishedContent } from '../../utils/content';
+import { SITE_CONFIG } from '../../data/site';
+import { buildBreadcrumbSchema, buildCanonicalUrl } from '../../utils/seo';
+import {
+  VPN_TYPE_MATRIX,
+  PROTOCOL_COMPARISON_TABLE,
+  LINE_ARCHITECTURE_TABLE,
+  MOBILE_VPN_CLIENT_MATRIX,
+  VPN_DECISION_BRANCHES,
+  VPN_ACTION_CARDS,
+  VPN_HUB_FAQS,
+  VPN_INTERNAL_CLUSTER_LINKS,
+} from '../../data/vpn-hub-upgrade';
+
+const hub = getNavHub('vpn');
+const urlPath = hub.href;
+const title = `${hub.title}专题 — 协议原理、移动端工具与线路对比`;
+const description =
+  '系统区分传统海外商业 VPN、规则代理机场（Clash/Mihomo/VLESS）、合规游戏加速器与企业远程组网的本质差异，提供协议原理、IEPL专线 vs BGP中转、iOS/Android移动端选型、免费VPN隐私拆解、独享IP边界与防泄漏实操的专著级技术参考。';
+
+const verifiedDate = '2026-11-20';
+
+const all = await getAllPublishedContent();
+const relevant = all.filter(
+  (e) =>
+    e.data.category.includes('VPN') ||
+    e.data.category.includes('加速器') ||
+    e.data.urlPath.startsWith('/guides/') ||
+    e.data.urlPath.startsWith('/comparisons/')
+);
+const featured = relevant.filter((e) => e.data.featured).slice(0, 4);
+
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: hub.title, href: urlPath },
+];
+
+const headings = [
+  { depth: 2, slug: 'vpn-vs-proxy-matrix', text: '一、传统 VPN、规则代理机场与游戏加速器核心对比表' },
+  { depth: 3, slug: 'why-classic-vpn-fails', text: '为什么海外知名商业 VPN 在复杂网络下频频断联或拖慢国内站点？' },
+  { depth: 2, slug: 'protocol-principles', text: '二、协议原理拆解：WireGuard / OpenVPN vs VLESS-Reality / Trojan / Hysteria 2' },
+  { depth: 3, slug: 'anti-probe-and-quic', text: '主动探测防御、无证书 Reality 伪装与弱网 QUIC 拥塞控制差异' },
+  { depth: 2, slug: 'line-architecture', text: '三、线路架构对比：公网直连、BGP 中转与 IEPL / IPLC 物理专线' },
+  { depth: 3, slug: 'peak-congestion-and-vps', text: '晚高峰丢包率真相、专线超售识别与自建 VPS 的隐性成本核算' },
+  { depth: 2, slug: 'mobile-vpn-guide', text: '四、手机端（iOS / Android）工具选择矩阵与防坑安装规范' },
+  { depth: 3, slug: 'ios-apple-id-and-android-battery', text: 'iOS 外区 Apple ID 安全边界、Android 芯片架构与后台防杀保活' },
+  { depth: 2, slug: 'free-vpn-audit', text: '五、免费 VPN 商业模式拆解：限额引流版 vs 住宅代理寄生高危软件' },
+  { depth: 3, slug: 'free-vpn-red-lines', text: '甄别高危免费软件与恶意浏览器扩展的四项技术红线' },
+  { depth: 2, slug: 'booster-vs-proxy', text: '六、游戏加速器边界、远程办公组网与独享静态原生 IP 需求' },
+  { depth: 3, slug: 'remote-work-and-ip', text: '何时只需 ¥15–¥27 共享专线，何时必须投入独享静态原生 IP？' },
+  { depth: 2, slug: 'dns-webrtc-leaks', text: '七、分流防拖慢与 DNS / WebRTC / 时区 / IPv6 防泄漏自检清单' },
+  { depth: 2, slug: 'decision-and-subtopics', text: '八、四条核心决策分支、合规筛选入口与 7 个二级子专题导航' },
+  { depth: 2, slug: 'faq', text: '九、VPN 与加速器高频边界问题 FAQ（9 问）' },
+  { depth: 2, slug: 'related-clusters', text: '十、站内专题教程簇与推荐深度阅读' },
+];
+
+const schemas = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: buildCanonicalUrl(urlPath),
+    inLanguage: 'zh-CN',
+    dateModified: verifiedDate,
+    author: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.author,
+    },
+    isPartOf: {
+      '@type': 'WebSite',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.domain,
+    },
+    hasPart: hub.subtopics.map((s) => ({
+      '@type': 'CollectionPage',
+      name: s.title,
+      url: buildCanonicalUrl(s.href),
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: VPN_HUB_FAQS.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.answer,
+      },
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={urlPath}
+  ogType="article"
+  author={SITE_CONFIG.author}
+  publishDate="2026-10-15T00:00:00Z"
+  modifiedDate={`${verifiedDate}T18:50:00+08:00`}
+  tags={['VPN对比', '手机VPN', '免费VPN风险', '游戏加速器', 'IEPL专线', 'VLESS-Reality', 'Hysteria2']}
+  structuredData={schemas}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Main Monograph Article Column -->
+      <article class="lg:col-span-8 min-w-0 space-y-10" data-pagefind-body>
+        <!-- Header & Answer-First Summary -->
+        <header class="rounded-3xl bg-bg-surface border border-border-subtle p-6 sm:p-8 space-y-5">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="px-2.5 py-1 rounded-full bg-brand-soft text-brand-primary border border-blue-200 font-semibold">
+              一级导航专题 ② · 协议、工具与线路架构区
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-white text-text-title border border-border-subtle font-mono">
+              最近核实：{verifiedDate}
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+              技术原理与边界对照 · 无直接推广外链
+            </span>
+          </div>
+
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-text-title tracking-tight leading-tight">
+            {title}
+          </h1>
+
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            不少用户习惯把所有跨境上网工具、游戏加速器和企业组网软件笼统称为“VPN”，结果花了五六百元买海外商业 VPN 却连不上网、买了网游加速器却发现打不开 ChatGPT，或者安装了来路不明的“永久免费 VPN”导致账号与本地宽带面临风险。本专题从底层网络协议、物理线路结构、移动端客户端安全边界与场景风控四个层面，讲透不同工具的适用边界与决策依据。
+          </p>
+
+          <!-- Answer-First Direct Conclusions -->
+          <div class="rounded-2xl bg-white border border-blue-200 p-5 space-y-3 shadow-xs">
+            <div class="flex items-center gap-2 text-sm font-bold text-brand-primary">
+              <span>直接结论（选型前先对照这四条）</span>
+            </div>
+            <ul class="space-y-2 text-sm text-text-body leading-relaxed list-disc pl-5">
+              <li>
+                <strong>日常跨境办公、AI 工具与国内外网站混用：</strong>不要买面向全球普通消费者的传统商业 VPN（如标准 OpenVPN/WireGuard 体系），这类产品缺乏国内 BGP/IEPL 中转优化且国内网站易被全局拖慢；应优先使用支持 <strong>Rule 规则分流</strong> 的开源客户端（Clash Verge Rev / FlClash / Shadowrocket / Stash）搭配 <strong>IEPL/IPLC 专线或优质 BGP 中转</strong> 服务（实测主流月付在 ¥15–¥27 区间）。
+              </li>
+              <li>
+                <strong>游戏联机 vs 浏览器/AI：</strong>合规网游加速器（UU/雷神等）只对特定游戏进程与 UDP 服务器段做白名单加速，<strong>完全不能代理浏览器或 ChatGPT</strong>；且不要同时在电脑端开启游戏加速器与 Clash TUN 虚拟网卡，避免驱动路由冲突直接断网。
+              </li>
+              <li>
+                <strong>手机端与免费 VPN 红线：</strong>iOS 首选外区 App Store 买断制 <strong>Shadowrocket</strong> 或 Clash 原生兼容的 <strong>Stash</strong>，免费轻量备选 <strong>Karing / Hiddify / Clash Mi</strong>；Android 优选 <strong>FlClash / Clash Meta for Android / v2rayNG / SFA</strong>。远离无清晰商业主体却号称“永久免费不限速”的 App，以及要求安装系统根证书的工具。
+              </li>
+              <li>
+                <strong>严风控电商/资金账号边界：</strong>切勿用月付十几到二十几元、数百人共享出口 IP 的普通机场登录 Amazon、TikTok 店铺主账号或海外银行系统；强防关联需求必须使用 <strong>独享静态原生 IP 定制方案</strong>（常见定制预算约 ¥600–¥680+/月）或企业自建独立网关。
+              </li>
+            </ul>
+            <div class="pt-1 flex flex-wrap gap-2.5 text-xs">
+              <a
+                href="#vpn-vs-proxy-matrix"
+                class="px-3.5 py-2 rounded-xl bg-brand-primary text-white font-semibold hover:bg-brand-primary-hover transition-colors"
+              >
+                查看五大方案对比总表
+              </a>
+              <a
+                href="#mobile-vpn-guide"
+                class="px-3.5 py-2 rounded-xl bg-bg-surface text-text-title border border-border-subtle font-semibold hover:border-brand-primary transition-colors"
+              >
+                对比 iOS / Android 工具
+              </a>
+              <a
+                href="#line-architecture"
+                class="px-3.5 py-2 rounded-xl bg-bg-surface text-text-title border border-border-subtle font-semibold hover:border-brand-primary transition-colors"
+              >
+                看懂 IEPL 专线与中转区别
+              </a>
+            </div>
+          </div>
+
+          <!-- Mobile Collapsible TOC -->
+          <div class="lg:hidden">
+            <details class="rounded-2xl border border-border-subtle bg-white p-4">
+              <summary class="text-sm font-bold text-text-title cursor-pointer flex items-center justify-between">
+                <span>本页完整章节目录（共 10 章）</span>
+                <span class="text-xs font-normal text-brand-primary">点击展开</span>
+              </summary>
+              <nav class="mt-3 space-y-1.5 text-xs border-t border-border-subtle pt-3">
+                {headings.map((h) => (
+                  <a
+                    href={`#${h.slug}`}
+                    class:list={[
+                      'block py-1 hover:text-brand-primary transition-colors',
+                      h.depth === 2 ? 'font-semibold text-text-title' : 'pl-3 text-text-muted',
+                    ]}
+                  >
+                    {h.text}
+                  </a>
+                ))}
+              </nav>
+            </details>
+          </div>
+        </header>
+
+        <!-- Section 1: 5-Way Tool Comparison Matrix -->
+        <section id="vpn-vs-proxy-matrix" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            一、传统 VPN、规则代理机场与游戏加速器核心对比表
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            选错工具类别，比在同类产品里挑错品牌带来的时间浪费更大。表面上看，商业 VPN、规则代理机场、网游加速器、企业组网软件都在手机状态栏或电脑托盘里显示一个“连接开关”，甚至在安卓端都会向系统申请建立 <code>VpnService</code> 虚拟通道；但它们传输层的设计初衷、路由路径与适用边界完全不在同一条赛道。下表按协议、路径、分流粒度、真实月度门槛及适用边界，把市面上常见的五类方案一次性摊开对比。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 1：五类跨境工具协议、传输路径与适用边界对照</span>
+              <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[620px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-bold w-[22%]">工具类别</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">核心协议与传输路径</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">分流粒度与费用参考</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">最适合场景与客户端约束</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-text-body">
+                  {VPN_TYPE_MATRIX.map((row) => (
+                    <tr class="hover:bg-slate-50/70 align-top">
+                      <td class="p-3 sm:p-3.5 font-bold text-text-title leading-relaxed">{row.category}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div><span class="font-semibold text-text-title">协议：</span>{row.coreProtocols}</div>
+                        <div class="text-xs text-text-muted"><span class="font-semibold">路径：</span>{row.networkPath}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div>{row.routingGranularity}</div>
+                        <div class="text-xs text-text-muted">{row.aiAndStreaming}</div>
+                        <div class="font-medium text-brand-primary text-xs">{row.typicalCostAndBilling}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div>{row.bestFor}</div>
+                        <div class="text-xs text-text-muted">{row.clientControl}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 id="why-classic-vpn-fails" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            为什么海外知名商业 VPN 在复杂网络下频频断联或拖慢国内站点？
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            许多刚接触跨境网络的用户都会产生一个直觉误判：在海外科技媒体或 YouTube 测评里排名靠前、月费五六十元的国际老牌商业 VPN，稳定性和速度理应远胜过十几二十元的规则代理订阅。但在实际连接后往往遇到两重挫败：要么客户端转圈半天根本握不上手，要么好不容易连上一个节点，随后打开微信发图、看 B 站视频、登录淘宝和公司办公系统却卡成了幻灯片。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            背后的原因并不神秘。第一，传统商业 VPN 面向的是欧美及全球公共 Wi-Fi 安全用户，产品重心放在“整台设备的全部数据包高强度加密”，默认把你所有的流量塞进一条海外隧道（Tunnel），缺少针对中文互联网数万个国内域名、IP 段与 CDN 的精细直连规则；第二，其通信端口与握手特征过于规范和单一，一旦部署在跨境强干扰网络上极易触发精准丢包或阻断；第三，这类服务通常从你本地家庭宽带直接拉公网连接海外节点，既没有国内三网 BGP 入口调度，也没有点对点内网专线绕开国际出口拥堵。相比之下，现代规则代理采用“开源客户端本地按规则毫秒级分流 + 国内入口中转或 IEPL 专线过境 + 现代混淆/无证书伪装协议”，刚好精准击中了这三个痛点。更细致的对比分析可参考
+            <a href="/comparisons/vpn-vs-airport-proxy/" class="text-brand-primary font-semibold hover:underline">传统 VPN 与规则代理机场深度对比</a>。
+          </p>
+        </section>
+
+        <!-- Section 2: Protocol Technical Principles -->
+        <section id="protocol-principles" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            二、协议原理拆解：WireGuard / OpenVPN vs VLESS-Reality / Trojan / Hysteria 2
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            无论是商业软件还是开源客户端，决定连接究竟能不能建立、延迟抖动大不大、在弱网校园网能不能跑出速度、以及手机挂一天电掉得快不快，底层核心都是<strong>传输协议</strong>。理解各代协议的设计取舍，能帮你看懂节点列表里那一串英文后缀究竟意味着什么，而不是盲目迷信玄学名词。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 2：主流传输协议特性、抗探测与弱网表现对照</span>
+              <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[620px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-bold w-[20%]">协议名称</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[27%]">传输层与伪装 / RTT</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[27%]">抗探测与弱网丢包表现</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">移动端功耗与适用场景</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-text-body">
+                  {PROTOCOL_COMPARISON_TABLE.map((row) => (
+                    <tr class="hover:bg-slate-50/70 align-top">
+                      <td class="p-3 sm:p-3.5 font-bold text-text-title leading-relaxed">{row.protocol}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div>{row.transportLayer}</div>
+                        <div class="text-xs text-text-muted">{row.handshakeAndRtt}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div><span class="font-semibold text-text-title">抗探测：</span>{row.antiProbeAbility}</div>
+                        <div class="text-xs text-text-muted"><span class="font-semibold">弱网：</span>{row.weakNetworkBehavior}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div>{row.recommendedScenario}</div>
+                        <div class="text-xs text-text-muted">{row.mobileBatteryAndCompat}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 id="anti-probe-and-quic" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            主动探测防御、无证书 Reality 伪装与弱网 QUIC 拥塞控制差异
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            把传输协议拆成两个实际判断点会更容易理解：一个是<strong>在公网直连环境下如何躲过主动探测与特征阻断</strong>，另一个是<strong>在高丢包链路上如何抢带宽与保延迟</strong>。早期的 Trojan 和 VLESS+TLS 思路是自己注册域名、申请一张真实 HTTPS 证书部署在海外服务器上，如果遇到外部不明探测请求就悄悄转发给本地搭建的正常博客或企业站。但这仍需要维护域名与 TLS 指纹，一旦证书配置敷衍或被标记依然存在隐患。而现代的 <strong>VLESS-Reality</strong> 干脆连自有域名和证书都省掉了：它直接从链路层“借用”真实世界知名大站（如苹果、微软或大型 CDN 站点）的公钥特征响应合法用户，并将可疑探测原封不动回落到那个真大站去处理，因此公网隐蔽性是目前公认最稳健的方案之一。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            而在另一侧，如果传输链路本身处于晚高峰 5%–15% 丢包的拥挤公网环境（例如校园网出口或跨省移动宽带直连跨洋 VPS），传统基于 TCP 拥塞控制的协议一旦检测到丢包，就会触发“主动降速减半”退让机制，导致测速看着延迟只有一百多毫秒，实际看高清视频却反复缓冲转圈。基于 UDP 与定制 QUIC 的 <strong>Hysteria 2</strong> 则反其道而行之，通过主动探测链路可用速率和 Brutal 拥塞控制策略，在存在一定丢包率时依然维持较高吞吐。不过，Hysteria 2 并非在任何地方都无敌：如果当地宿舍网、公司网络或某个省市运营商对大流量 UDP/QUIC 实施强硬的限速或全面封包，Hysteria 2 会瞬间失效；此时立刻切回基于 TCP 的 VLESS-Reality 或 Trojan 才是正解。详见
+            <a href="/comparisons/vless-trojan-hysteria2-comparison/" class="text-brand-primary font-semibold hover:underline">VLESS-Reality、Trojan 与 Hysteria 2 横向实测</a> 以及
+            <a href="/resources/hysteria2-campus-network-tuning/" class="text-brand-primary font-semibold hover:underline">校园网弱网调优实战</a>。
+          </p>
+        </section>
+
+        <!-- Section 3: Line Architecture (Direct vs BGP vs IEPL) -->
+        <section id="line-architecture" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            三、线路架构对比：公网直连、BGP 中转与 IEPL / IPLC 物理专线
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            许多用户挑服务时只看客户端节点列表里写的是不是“VLESS”或“Hysteria 2”，却忽略了一项权重往往占到 70% 以上的物理决定因素——<strong>数据包到底是走公网直接出海，还是通过国内机房做过中转，抑或是走了点对点物理内网专线（IEPL/IPLC）</strong>。如果物理跨洋路由已经拥堵成停车场，上层再怎么换协议也只能改善有限体验。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 3：公网直连、BGP 中转与 IEPL/IPLC 专线差异</span>
+              <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[600px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-bold w-[20%]">线路架构与月度起步</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[27%]">跨境物理传输路径</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[27%]">晚高峰丢包与延迟抖动</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">自检与验收方法</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-text-body">
+                  {LINE_ARCHITECTURE_TABLE.map((row) => (
+                    <tr class="hover:bg-slate-50/70 align-top">
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1">
+                        <div class="font-bold text-text-title">{row.lineType}</div>
+                        <div class="text-xs text-brand-primary font-medium">{row.typicalMonthlyPrice}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.crossBorderPath}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1.5">
+                        <div>{row.peakCongestionResistance}</div>
+                        <div class="text-xs text-text-muted">{row.latencyJitter}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.verificationMethod}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 id="peak-congestion-and-vps" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            晚高峰丢包率真相、专线超售识别与自建 VPS 的隐性成本核算
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            为什么同样一条线路，白天下午测速能轻松跑满本地百兆、千兆宽带，到了晚上 20:30 至 23:00 却连 480P 视频都不断缓冲？原因正是全国家庭用户在晚高峰集中涌向有限的公网国际出口带宽，引发运营商骨干路由器丢包和 QoS 主动限流。<strong>IEPL（国际以太网专线）与 IPLC（国际专线）</strong> 的价值在于：用户的数据包先连向国内上海、广州、北京或深圳的多线 BGP 入口机房，之后直接走运营商独立划拨的点对点内网电路跨境抵达香港、日本或新加坡机房，物理层彻底绕开了拥挤不堪的公共互联网国际出口，因此在晚高峰依然能保持较低延迟和极小抖动。详情与定价拆解见
+            <a href="/comparisons/iepl-vs-bgp-transit/" class="text-brand-primary font-semibold hover:underline">IEPL/IPLC 专线 vs 公网 BGP 中转完整对比</a>。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            不过选购时必须保持两份清醒。第一，宣传写了“IEPL”并不等于绝对不卡——如果某个服务商贪图低价把几万名用户的并发全挤进一条狭窄的小口径专线，或者从你家宽带连去深圳/上海入口的那一段跨网互联本身质量太差，依然会在晚高峰集体掉速；所以再漂亮的架构宣传也要先用单月低门槛实测 3 天再决定长期续费。第二，不少开发者会问“我直接买一台最便宜的海外 VPS 自己搭 WireGuard 或 Reality 会不会更划算”？如果按纯资金与时间投入算账：普通低价直连 VPS 在晚高峰几乎避不开国际公网拥堵；而真正带三网 CN2 GIA 或优质优化线路的独享机器，单台月租动辄七八十元以上，且一旦 IP 受损还要花换 IP 费与运维排查时间。因此除非你需要独享固定 IP、有强运维掌控需求或本来就顺带跑私有业务，否则日常使用远不如合规的中转/专线订阅性价比高。
+          </p>
+        </section>
+
+        <!-- Section 4: Mobile VPN & Client Matrix -->
+        <section id="mobile-vpn-guide" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            四、手机端（iOS / Android）工具选择矩阵与防坑安装规范
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            移动端是用户搜索“VPN 推荐”、“手机 VPN”时需求最集中、同时也是最容易误下载流氓软件的高风险区。与桌面端不同，iOS 受到苹果 App Store 封闭生态和地区账号限制，Android 则面对五花八门的手机厂商后台杀进程策略以及高危第三方网盘/山寨商店问题。下表涵盖当前移动端最受核实、仍在活跃生态内的主流客户端工具。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 4：移动端（iOS / Android）主流客户端获取与兼容对比</span>
+              <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[600px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-bold w-[22%]">客户端与平台</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[26%]">内核与订阅兼容</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[24%]">费用与安全获取渠道</th>
+                    <th class="p-3 sm:p-3.5 font-bold w-[28%]">优劣势与实操重点</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-text-body">
+                  {MOBILE_VPN_CLIENT_MATRIX.map((row) => (
+                    <tr class="hover:bg-slate-50/70 align-top">
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1">
+                        <a href={row.detailHref} class="font-bold text-brand-primary hover:underline">
+                          {row.client}
+                        </a>
+                        <div class="text-xs text-text-muted">{row.os}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.coreOrCompat}</td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1">
+                        <div class="font-medium text-text-title">{row.costModel}</div>
+                        <div class="text-xs text-text-muted">{row.acquisitionChannel}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed">{row.caveatsAndStrengths}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 id="ios-apple-id-and-android-battery" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            iOS 外区 Apple ID 安全边界、Android 芯片架构与后台防杀保活
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-2xl border border-border-subtle bg-white p-5 space-y-2.5">
+              <h4 class="text-base font-bold text-text-title">iOS / iPadOS 安全安装三条铁律</h4>
+              <p class="text-sm text-text-body leading-relaxed">
+                第一，购买和下载 Shadowrocket、Stash、Quantumult X 或免费的 Karing/Hiddify 时，应当只打开手机里的 <strong>App Store 应用程序</strong>，点击右上角头像退出登录后再登入非国区账号，下载完成后立刻切回自己的日常账号——<strong>绝对不要在系统「设置」最顶端的 Apple ID（iCloud）位置登录任何别人分享的公共账号</strong>，否则一旦账号密码被篡改或开启「查找我的 iPhone」，手机有被远程变砖锁死的风险。第二，核对开发者主体名称与软件大小，防止搜到花钱买广告排第一的收费冒牌“Shadowrocket Pro / 极速小火箭”。第三，开启「按需连接（Connect On Demand）」并排查代理规则，否则 Wi-Fi 切换 5G 时容易短时漏流。详见
+                <a href="/guides/ios-proxy-clients-guide/" class="text-brand-primary font-semibold hover:underline">iPhone 代理客户端全攻略</a> 与
+                <a href="/reviews/ios-proxy-apps-review/" class="text-brand-primary font-semibold hover:underline">iOS 付费与免费工具横评</a>。
+              </p>
+            </div>
+            <div class="rounded-2xl border border-border-subtle bg-white p-5 space-y-2.5">
+              <h4 class="text-base font-bold text-text-title">Android 架构核对与后台防杀步骤</h4>
+              <p class="text-sm text-text-body leading-relaxed">
+                安卓安装 <strong>FlClash</strong>、<strong>Clash Meta for Android</strong>、<strong>v2rayNG</strong> 或 <strong>SFA</strong> 时，近几年主流手机统一下载 <code>arm64-v8a</code>（或包含多架构的 <code>universal</code>）APK，避免下载老旧 <code>armeabi-v7a</code> 引发运行性能打折。若需安装旧时知名的 NekoBox for Android，务必确认仅来自原作者开源发布页且已知其维护有限，切勿从 Google Play 等非原始渠道随意安装可能已被第三方接管的同名变体。装好后，在系统「最近任务」对客户端下拉加锁，并进入「应用信息 → 耗电管理」开启<strong>允许完全后台行为 / 不优化电池</strong>，同时尽量选用基于 TCP 的 VLESS-Reality 或 Shadowsocks 作为移动日常主力，避免长时间用多路 UDP 并发明显发热掉电。参见
+                <a href="/guides/android-proxy-clients-guide/" class="text-brand-primary font-semibold hover:underline">Android 客户端选型与省电指南</a>。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 5: Free VPN Audit & Red Lines -->
+        <section id="free-vpn-audit" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            五、免费 VPN 商业模式拆解：限额引流版 vs 住宅代理寄生高危软件
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            海外服务器租用、跨境国际线路采购以及人工防滥用维护全都需要真金白银支出。面对网上随处可见的“免费 VPN”，真正值得花时间判断的并不是“连不连得上”，而是<strong>“谁在替你的每 1GB 跨境带宽买单，以及他打算从你这里拿走什么回报”</strong>。如果无法合理解释成本来源，免费往往意味着你本人设备或隐私正在成为被出售的商品。
+          </p>
+          <ul class="space-y-2.5 text-sm sm:text-base text-text-body leading-relaxed list-disc pl-5">
+            <li>
+              <strong>合规可解释模式（Freemium 严格限额引流）：</strong>少数具备真实海外公司主体的知名商业 VPN，会开放固定极少量节点并限制每月 2GB–10GB 流量或较低速率，靠 5%–10% 转化成高价付费订阅的用户来覆盖免费池成本。此类软件一般不偷卖数据，但在复杂跨境网络环境下普遍因为标准端口被限而难以长期稳定连接。
+            </li>
+            <li>
+              <strong>高危寄生模式（P2P 住宅代理网络变现）：</strong>许多手机应用商店里零广告、号称“永远不限流量、一键高速”的陌生免费 VPN 和免费浏览器插件，商业模式是偷偷把你的手机或家用 PC 纳入它的底层 <strong>住宅代理池（Residential Proxy Botnet）</strong>。当它给你接向海外服务器时，同时也有不知名的第三方付费买家通过你的家庭宽带 IP 出去发送垃圾邮件、做电商刷单、爬站甚至恶意请求，一旦引发追查，留下的出口日志就是你的真实家庭宽带归属。
+            </li>
+            <li>
+              <strong>直接窃密模式（浏览器数据变现与劫持修改版）：</strong>某些来路不明的“破解永久 VIP 版 VPN”或流氓插件会收集完整 DNS 与访问域名轨迹出售给数据经纪商，甚至在安装时诱导你安装自定义 HTTPS 中间人根证书（CA Certificate），从而具备实时解密银行密码、电邮 Token 和电商后台会话的能力。深入剖析见
+              <a href="/guides/free-vpn-privacy-audit/" class="text-brand-primary font-semibold hover:underline">免费 VPN 隐私政策与商业模式拆解</a> 与
+              <a href="/resources/free-nodes/" class="text-brand-primary font-semibold hover:underline">免费节点与免费代理资源全指南</a>。
+            </li>
+          </ul>
+
+          <h3 id="free-vpn-red-lines" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            甄别高危免费软件与恶意浏览器扩展的四项技术红线
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            无论是桌面端、手机端还是 Chrome 扩展商城里的代理工具，只要触犯下方四条技术红线中的任意一条，无论测速显示多快，都应当立刻卸载排查：
+          </p>
+          <ol class="space-y-2 text-sm sm:text-base text-text-body leading-relaxed list-decimal pl-5">
+            <li>
+              <strong>要求手动安装或信任“系统根证书（Root CA）”：</strong>纯网络层代理软件只需建立 VPN 虚拟网卡或代理端口即可转发加密流量，绝对没有任何正当理由要求你导入新的信任证书。
+            </li>
+            <li>
+              <strong>索取与网络转发毫不相干的敏感权限：</strong>手机端若弹出读取通讯录、短信验证码、相册文件或无障碍全屏控制权限要求，直接判定存在隐私越权采集风险。
+            </li>
+            <li>
+              <strong>强绑定浏览器扩展且宣称“支持一键破解解锁一切网站 VIP”：</strong>带有明显灰黑产话术的扩展往往附带恶意脚本注入，能直接修改购物、广告返利或交易所页面的收款信息。
+            </li>
+            <li>
+              <strong>使用非开源、无发布签名校验且来源为陌生网盘的“专属破解安装包”：</strong>与官方开源代码透明的 Clash Verge Rev、FlClash、v2rayNG 不同，闭源修改版包体极易被额外植入后台静默木马。可延伸了解
+              <a href="/resources/proprietary-client-risks/" class="text-brand-primary font-semibold hover:underline">闭源与篡改版专属客户端风险分析</a>。
+            </li>
+          </ol>
+        </section>
+
+        <!-- Section 6: Game Booster, Remote Work & Dedicated Native IP -->
+        <section id="booster-vs-proxy" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            六、游戏加速器边界、远程办公组网与独享静态原生 IP 需求
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            除了“翻墙浏览与看视频”，用户还经常在两类跨界场景里混淆 VPN 与代理工具的能力边界：一类是<strong>游戏联机与低抖动语音</strong>，另一类是<strong>跨境远程办公、外贸独立站运营及电商多账号防关联</strong>。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            先说游戏加速器。国内主流合规网游加速器（如 UU、雷神、奇游等）在底层通过驱动或虚拟网卡钩子精确抓取特定游戏的 <code>.exe</code> 进程及其联机服务器 IP 段，做到最小路径直达游戏节点以压低丢包率。它们严格遵循网络合规要求——你的浏览器、终端、Discord（部分未接入游戏白名单模块时）和 ChatGPT 并不会被路由过去，因此<strong>绝不可能拿游戏加速器当梯子用</strong>。反过来，如果你希望直接用优质 IEPL 专线机场带电脑或主机（Switch / PS5）联机，需要确认服务商节点允许 <strong>UDP 转发与 FullCone NAT</strong>，并在 Clash Verge Rev 开启 TUN 模式（或部署在软路由 OpenWrt 下），且一定记住在打开游戏加速器时彻底关闭 Clash 的 TUN 模式，否则两者同时写入系统默认路由必然打架断网。详见
+            <a href="/guides/game-booster-vs-proxy/" class="text-brand-primary font-semibold hover:underline">游戏加速器与全流量代理路由区别</a> 及
+            <a href="/clash/tun-mode-udp-guide/" class="text-brand-primary font-semibold hover:underline">Clash TUN 与 UDP 转发实战教程</a>。
+          </p>
+
+          <h3 id="remote-work-and-ip" class="text-lg sm:text-xl font-bold text-text-title pt-2">
+            何时只需 ¥15–¥27 共享专线，何时必须投入独享静态原生 IP？
+          </h3>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            在跨境工作领域，一个极其昂贵但常常等到被封店、封号才意识到的误区，就是分不清<strong>传输安全（加密防窃听）</strong>与<strong>出口身份纯净度（防风控关联）</strong>的区别。在正规协议下，哪怕是使用月付 ¥18–¥25 档位的共享专线机场，你的账号密码经过目标网站 HTTPS 加密和代理隧道双重保护，服务商和中间人本身也看不到明文内容；但<strong>同一个共享落地服务器出口 IP 会同时挂着数百甚至上千名其他陌生用户的流量</strong>。
+          </p>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            如果你的用途是检索学术资料、拉取 GitHub 代码、日常问答使用 ChatGPT 或看流媒体影视，这种低门槛共享专线（部分还针对 AI 优化了干净落地池或通过规则固定某一地区）完全够用且性价比最高；但只要你的场景涉及 <strong>Amazon / Shopify 跨境电商店铺后台、TikTok 直播带货矩阵、PayPal/海外银行收付款、广告投放户管理，或者高净值金融交易</strong>，多账号共用大众机场 IP 几乎等同于在平台风控系统眼里“把自己的店和几百个陌生人的异常行为绑在一台机器上”，随时可能连带触发二审或冻结。这类场景必须转向每月几百元级别的<strong>独享静态原生 IP 定制方案</strong>（如业内提供企业定制的服务商常见起步报价在 ¥600–¥680/月区间），而若只是远程访问自己公司内网服务器与代码仓库，则应采用零信任或点对点的 <strong>WireGuard / Tailscale / 企业合规专线</strong>。详细决策对照请看
+            <a href="/reviews/remote-work-vpn-vs-proxy/" class="text-brand-primary font-semibold hover:underline">远程办公、独立站运营与独享 IP 方案评测</a>。
+          </p>
+        </section>
+
+        <!-- Section 7: DNS, WebRTC & IPv6 Anti-Leak Self-Check -->
+        <section id="dns-webrtc-leaks" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            七、分流防拖慢与 DNS / WebRTC / 时区 / IPv6 防泄漏自检清单
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            哪怕买对了协议、选好了专线也装上了正版客户端，最后如果浏览器或系统暴露了“破绽”，同样会导致海外网站提示地区不符、AI 服务弹出 Access Denied，或者访问国内应用卡顿异常。在正式投入日常办公或特定地区访问前，建议按这四项顺序做一次完整上线自检：
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-2xl border border-border-subtle bg-white p-5 space-y-2">
+              <h3 class="text-base font-bold text-text-title">1. 检查是否误开 Global 模式或漏配国内直连</h3>
+              <p class="text-sm text-text-body leading-relaxed">
+                在 Clash Verge Rev、FlClash 或 Shadowrocket 主界面，务必确保路由模式处于 <strong>Rule（规则分流）</strong>。如果你用的客户端不支持按域名规则直连，可核查订阅是否包含完整 GeoIP-CN 与 GeoSite-CN 列表；一旦开启 Global 模式，国内请求全部漂洋过海绕一圈，不但延迟飙升至百毫秒级，还会快速消耗付费高速流量。
+              </p>
+            </div>
+            <div class="rounded-2xl border border-border-subtle bg-white p-5 space-y-2">
+              <h3 class="text-base font-bold text-text-title">2. 验证 DNS 请求未从本地宽带泄漏</h3>
+              <p class="text-sm text-text-body leading-relaxed">
+                传统系统代理若未配合合理 DNS 配置，浏览器可能先用本地电信/联通 DNS 去查海外域名，直接泄露真实所在省份或拿到被污染的假 IP。在 Mihomo/Clash 系工具中优先启用 <strong>Fake-IP 模式 + Sniffer 域名嗅探</strong> 并拆分国内外加密 DNS（DoH），让海外域名直接送往远程节点端解析。详见
+                <a href="/clash/dns-fakeip-configuration-guide/" class="text-brand-primary font-semibold hover:underline">Clash DNS 防泄漏与 Fake-IP 指南</a>。
+              </p>
+            </div>
+            <div class="rounded-2xl border border-border-subtle bg-white p-5 space-y-2">
+              <h3 class="text-base font-bold text-text-title">3. 修复宽带公网 IPv6 优先直连造成的 IP 泄漏</h3>
+              <p class="text-sm text-text-body leading-relaxed">
+                当前大部分家庭宽带和校园网默认开启了公网 IPv6，而大量代理节点与传统 VPN 对 IPv6 转发支持不完整。结果是访问同时支持双栈的海外网站时，浏览器偷偷通过本地 IPv6 通道直出而绕过了代理。排查方法：若检测站显示外网 IPv4 是海外而 IPv6 仍显示本地运营商，应在配置中关闭节点缺失的 IPv6 解析返回或使用系统适配规则处理。详见
+                <a href="/resources/ipv6-conflict-and-dual-stack-fix/" class="text-brand-primary font-semibold hover:underline">IPv6 双栈冲突修复方案</a>。
+              </p>
+            </div>
+            <div class="rounded-2xl border border-border-subtle bg-white p-5 space-y-2">
+              <h3 class="text-base font-bold text-text-title">4. 检查浏览器 WebRTC、系统时区与系统语言一致</h3>
+              <p class="text-sm text-text-body leading-relaxed">
+                对于运营账号、外贸问卷、TikTok 环境与风控严格的 AI 平台，仅仅隐藏 HTTP 出口 IP 还不够：浏览器内置的 WebRTC 接口可以直接绕过代理读取本地物理网卡真实地址，操作系统时区（UTC+8）与节点所在地区（如美国/新加坡）冲突也会触发异常风控评分。重要业务环境务必关闭高风险页的 WebRTC 本地候选地址暴露并对齐环境时区。详见
+                <a href="/guides/webrtc-and-timezone-leak-prevention/" class="text-brand-primary font-semibold hover:underline">WebRTC 与时区防泄漏教程</a>。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 8: Scenario Decision Branches, Action Cards & Subtopics -->
+        <section id="decision-and-subtopics" class="scroll-mt-24 space-y-6">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            八、四条核心决策分支、合规筛选入口与 7 个二级子专题导航
+          </h2>
+          <p class="text-sm sm:text-base text-text-body leading-relaxed">
+            看清技术原理和风险边界后，把你的具体目标对号入座到下面四条可执行分支之一，就能直接决定下一步该装哪类软件、选什么协议与线路，以及去哪里核对详细参数：
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {VPN_DECISION_BRANCHES.map((branch) => (
+              <div class="rounded-2xl border border-border-subtle bg-white p-5 flex flex-col justify-between gap-4">
+                <div class="space-y-2.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-soft text-brand-primary border border-blue-200">
+                      {branch.badge}
+                    </span>
+                  </div>
+                  <h3 class="text-base font-bold text-text-title leading-snug">{branch.title}</h3>
+                  <p class="text-xs text-text-body leading-relaxed">
+                    <strong>适用前提：</strong>{branch.condition}
+                  </p>
+                  <p class="text-xs text-text-body leading-relaxed">
+                    <strong>推荐路径：</strong>{branch.recommendation}
+                  </p>
+                  <p class="text-xs text-amber-800 bg-amber-50/70 border border-amber-200 rounded-xl p-2.5 leading-relaxed">
+                    <strong>避坑提醒：</strong>{branch.avoid}
+                  </p>
+                  <ol class="text-xs text-text-body space-y-1 list-decimal pl-4 leading-relaxed">
+                    {branch.steps.map((s) => (
+                      <li>{s}</li>
+                    ))}
+                  </ol>
+                </div>
+                <a
+                  href={branch.href}
+                  class="inline-flex items-center justify-center px-3.5 py-2 rounded-xl bg-bg-surface border border-border-subtle text-xs font-semibold text-brand-primary hover:border-brand-primary transition-colors"
+                >
+                  {branch.ctaText} →
+                </a>
+              </div>
+            ))}
+          </div>
+
+          <!-- Action Guidance Cards (Zero external affiliate links) -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            {VPN_ACTION_CARDS.map((card) => (
+              <div class="rounded-2xl border border-border-subtle bg-white p-5 flex flex-col justify-between gap-4 shadow-xs">
+                <div class="space-y-2">
+                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-bg-surface text-text-muted border border-border-subtle">
+                    {card.category}
+                  </span>
+                  <h3 class="text-base font-bold text-text-title leading-snug">{card.title}</h3>
+                  <p class="text-xs text-text-body leading-relaxed">{card.summary}</p>
+                  <p class="text-[11px] text-text-muted leading-relaxed">{card.scopeNote}</p>
+                </div>
+                <a
+                  href={card.href}
+                  class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-brand-primary text-white text-xs font-semibold hover:bg-brand-primary-hover transition-colors"
+                >
+                  {card.ctaLabel} →
+                </a>
+              </div>
+            ))}
+          </div>
+
+          <!-- Preserve All 7 Subtopic Navigation Cards -->
+          <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <h3 class="text-base font-bold text-text-title">VPN 与加速器专题二级导航目录（共 {hub.subtopics.length} 个子栏目）</h3>
+              <span class="text-xs text-text-muted">对应不同设备端、协议对比与评测细分入口</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {hub.subtopics.map((sub) => (
+                <a
+                  href={sub.href}
+                  class="rounded-xl border border-border-subtle bg-white p-4 flex flex-col justify-between gap-2 hover:border-brand-primary transition-colors group"
+                >
+                  <div>
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-sm font-bold text-text-title group-hover:text-brand-primary transition-colors">
+                        {sub.title}
+                      </span>
+                      <span class="text-[11px] text-text-muted shrink-0">{sub.clusters.length} 集群</span>
+                    </div>
+                    <p class="text-xs text-text-muted mt-1 leading-relaxed">{sub.description}</p>
+                  </div>
+                  <span class="text-xs font-semibold text-brand-primary">进入子专题 →</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 9: High-Value Boundary FAQs -->
+        <section id="faq" class="scroll-mt-24 space-y-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            九、VPN 与加速器高频边界问题 FAQ（9 问）
+          </h2>
+          <div class="space-y-3">
+            {VPN_HUB_FAQS.map((faq) => (
+              <details class="group rounded-2xl border border-border-subtle bg-white p-4 sm:p-5">
+                <summary class="font-semibold text-text-title cursor-pointer flex items-center justify-between gap-3 list-none text-sm sm:text-base">
+                  <span>{faq.question}</span>
+                  <svg class="w-4 h-4 text-text-muted shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                  </svg>
+                </summary>
+                <div class="mt-3 text-sm text-text-body leading-relaxed space-y-2">
+                  <p>{faq.answer}</p>
+                  {faq.anchorHref && faq.anchorLabel && (
+                    <p>
+                      <a href={faq.anchorHref} class="text-xs font-semibold text-brand-primary hover:underline">
+                        对应章节：{faq.anchorLabel} ↑
+                      </a>
+                    </p>
+                  )}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        <!-- Section 10: Internal Clusters & Published Featured Guides -->
+        <section id="related-clusters" class="scroll-mt-24 space-y-6" data-pagefind-ignore>
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            十、站内专题教程簇与推荐深度阅读
+          </h2>
+          <p class="text-sm text-text-body leading-relaxed">
+            本专题已全面厘清 VPN、加速器与规则代理的协议差异、线路真相与移动端风险。如需按具体场景查看实操配置、内核评测或线路测试对比，可直接跳转下方站内相关文章：
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {VPN_INTERNAL_CLUSTER_LINKS.map((item) => (
+              <a
+                href={item.href}
+                class="card-elevated p-4 flex flex-col justify-between gap-2 group"
+              >
+                <div>
+                  <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium bg-bg-surface text-text-muted border border-border-subtle mb-1.5">
+                    {item.tag}
+                  </span>
+                  <h3 class="text-sm font-bold text-text-title group-hover:text-brand-primary transition-colors">
+                    {item.title}
+                  </h3>
+                  <p class="text-xs text-text-muted mt-1 leading-relaxed">{item.purpose}</p>
+                </div>
+                <span class="text-xs font-semibold text-brand-primary">阅读该页面 →</span>
+              </a>
+            ))}
+          </div>
+
+          {featured.length > 0 && (
+            <div class="space-y-4 pt-2">
+              <h3 class="text-base font-bold text-text-title">相关高优先级指南与对比精选</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {featured.map((entry) => (
+                  <ArticleCard
+                    title={entry.data.title}
+                    description={entry.data.description}
+                    urlPath={entry.data.urlPath}
+                    pageType={entry.data.pageType}
+                    category={entry.data.category}
+                    pubDate={entry.data.pubDate}
+                    updatedDate={entry.data.updatedDate}
+                    body={entry.body}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      </article>
+
+      <!-- Desktop Sticky Sidebar TOC & Quick Tool Entry -->
+      <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1" data-pagefind-ignore>
+        <TableOfContents headings={headings} />
+
+        <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5 space-y-3 text-xs">
+          <h2 class="text-sm font-bold text-text-title">延伸比对与安全起步工具</h2>
+          <p class="text-text-body leading-relaxed">
+            了解协议与线路差异后，可直接前往客户端安全下载教程、移动端评测或 32 家品牌筛查库比对详情：
+          </p>
+          <div class="flex flex-col gap-2">
+            <a
+              href="/clash/"
+              class="px-4 py-2.5 rounded-xl bg-brand-primary text-white font-semibold text-center hover:bg-brand-primary-hover transition-colors"
+            >
+              前往 Clash 客户端与校验专题（获取客户端）
+            </a>
+            <a
+              href="/comparisons/vpn-vs-airport-proxy/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              查看 VPN 与规则代理对比全文
+            </a>
+            <a
+              href="/comparisons/iepl-vs-bgp-transit/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              查看 IEPL 专线与 BGP 中转实价对比
+            </a>
+            <a
+              href="/brands/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              打开 32 家品牌筛选数据库（了解详情）
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

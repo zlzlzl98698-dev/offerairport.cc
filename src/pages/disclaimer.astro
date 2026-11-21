@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/common/Breadcrumbs.astro';
+import FaqAccordion from '../components/common/FaqAccordion.astro';
+import { SITE_CONFIG } from '../data/site';
+import { buildBreadcrumbSchema, buildCanonicalUrl, buildFaqSchema, type FAQItem } from '../utils/seo';
+
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: '免责、隐私与商业披露声明', href: '/disclaimer/' },
+];
+
+const disclaimerFaqs: FAQItem[] = [
+  {
+    question: '网站是否存在弹窗、第三方行为追踪广告或用户账号追踪？',
+    answer:
+      '没有。本站为纯静态预渲染网站，未接入 Google Analytics (GA4)、百度统计或 AdSense 等第三方跨站追踪与展示广告脚本，搜索功能由本地生成静态索引（Pagefind）在浏览器本地完成检索，不回传用户搜索行为。',
+  },
+  {
+    question: '通过本站品牌档案或优惠汇总页点击「前往官网」时，链接属性是如何规范的？',
+    answer:
+      '全站所有外部推广/合作服务商跳转链接均强制附加 `rel="nofollow sponsored noopener noreferrer"` 属性，且在页面顶部及页脚清晰披露推广返佣属性；所有技术教程与排障文章页严格维持 0 推广链接。',
+  },
+  {
+    question: '如果照着站点提供的某个品牌购买服务后遇到断连或拒绝退款，本站是否承担赔付责任？',
+    answer:
+      '不承担。第三方跨境网络服务存在不可抗力波动与服务商独立运营风险，本站仅在评测当时记录可核验的事实资料并反复提示「首试只选单月付、慎买多年付特价、特殊商品多不支持退款」，请每位读者依据自身网络与资金承受力自主理性决策。',
+  },
+];
+
+const schemas = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: `免责声明、隐私政策与商业披露 | ${SITE_CONFIG.name}`,
+    url: buildCanonicalUrl('/disclaimer/'),
+    inLanguage: 'zh-CN',
+  },
+  buildFaqSchema(disclaimerFaqs),
+];
+---
+
+<BaseLayout
+  title="免责声明、隐私政策与商业合作披露"
+  description="机场优选（offerairport.cc）官方合规披露：零第三方追踪隐私说明、外部链接 nofollow sponsored 规范、跨境工具合法用途边界及订阅风险提醒。"
+  canonicalUrl="/disclaimer/"
+  structuredData={schemas}
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mb-8 pb-6 border-b border-border-subtle space-y-4">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+        Disclosure & Privacy · 合规与风险边界
+      </span>
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-text-title leading-tight">
+        免责声明、隐私保护与商业披露规范
+      </h1>
+      <div class="rounded-2xl bg-bg-surface border border-border-subtle p-5 text-sm sm:text-base text-text-body leading-relaxed">
+        <strong class="text-text-title">核心声明：</strong>
+        {SITE_CONFIG.affiliateDisclosureText}
+      </div>
+    </header>
+
+    <div class="editorial-prose space-y-8">
+      <section>
+        <h2>一、商业联盟披露与外链属性规范</h2>
+        <ul>
+          <li><strong>明确身份边界</strong>：本站在 <code>/brands/*</code>、<code>/offers/</code>、<code>/reviews/*</code> 与 <code>/comparisons/*</code> 等评测与数据库分区中展示的合作注册链接可能包含推荐返佣代码（Affiliate Tracking）。若您通过相关链接订阅，本站可能获得一定比例推广佣金，但不会额外提高您的官方付款售价。</li>
+          <li><strong>严格 Rel 属性隔离</strong>：全站所有外部品牌推广入口统一配置 <code>rel="nofollow sponsored noopener noreferrer"</code>；所有 <code>/clash/*</code>、<code>/guides/*</code>、<code>/resources/*</code> 技术教程及故障排障页不放置任何商业推广按钮或返佣跳转。</li>
+          <li><strong>独立评估不设买榜</strong>：任何品牌无法通过付费购买排名名次，重点合作仅体现为优先整理其完整档案与展示补充截图，缺点、退款限制及资料差异依然如实列明。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>二、零追踪隐私承诺</h2>
+        <p>
+          截至当前最近核实日期（<code>{SITE_CONFIG.lastUpdated}</code>），{SITE_CONFIG.name} 构建输出全站无用户注册系统、无评论数据库，亦未嵌入第三方广告像素或行为统计 SDK。所有教程内提及的软件排查指令均建议优先核验开源仓库 SHA256 数字指纹，严禁运行未验证来源的非透明安装包。
+        </p>
+      </section>
+
+      <section>
+        <h2>三、资金风险提醒与合法用途约定</h2>
+        <ul>
+          <li>跨境网络工具仅建议用于合法合规的技术研发、开源文档查阅、跨境电商运营与科研学术信息检索，禁止用于任何网络攻击、违法扫描或侵害第三方权益的行为。</li>
+          <li>无论某品牌历史运营时长多久，预付长期套餐（尤其是两年付、三年付、终身会员）均面临外部线路变化与商家停摆的固有风险。强烈建议先以单月付实测当地晚高峰，并参考 <a href="/resources/airport-exit-scam-warning-signs/">跑路预警识别清单</a> 控制单笔预付额度。</li>
+        </ul>
+      </section>
+    </div>
+
+    <FaqAccordion title="关于声明与隐私的常见问题" faqs={disclaimerFaqs} />
+  </div>
+</BaseLayout>

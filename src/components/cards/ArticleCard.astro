@@ -1,0 +1,65 @@
+---
+import { PAGE_TYPES } from '../../data/site';
+import { formatDateZh, estimateReadingMinutes } from '../../utils/seo';
+
+interface Props {
+  title: string;
+  description: string;
+  urlPath: string;
+  pageType: keyof typeof PAGE_TYPES;
+  category: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  tags?: string[];
+  body?: string;
+}
+
+const {
+  title,
+  description,
+  urlPath,
+  pageType,
+  category,
+  pubDate,
+  updatedDate,
+  body = '',
+} = Astro.props;
+
+const typeInfo = PAGE_TYPES[pageType] ?? PAGE_TYPES.tutorial;
+const displayDate = formatDateZh(updatedDate || pubDate);
+const mins = body ? estimateReadingMinutes(body) : 6;
+---
+
+<article class="card-elevated p-5 sm:p-6 flex flex-col justify-between h-full">
+  <div>
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+      <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${typeInfo.badgeClass}`}>
+        {typeInfo.label}
+      </span>
+      <span class="text-xs text-text-muted font-mono">{displayDate}</span>
+    </div>
+
+    <h3 class="text-lg font-bold text-text-title leading-snug mb-2.5 line-clamp-2">
+      <a href={urlPath} class="hover:text-brand-primary transition-colors">
+        {title}
+      </a>
+    </h3>
+
+    <p class="text-sm text-text-body leading-relaxed line-clamp-3 mb-4">
+      {description}
+    </p>
+  </div>
+
+  <div class="pt-3 border-t border-border-subtle flex items-center justify-between gap-2 text-xs text-text-muted">
+    <span class="truncate max-w-[160px]">{category} · 约 {mins} 分钟</span>
+    <a
+      href={urlPath}
+      class="font-medium text-brand-primary hover:underline inline-flex items-center gap-1 shrink-0"
+    >
+      阅读全文
+      <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+      </svg>
+    </a>
+  </div>
+</article>

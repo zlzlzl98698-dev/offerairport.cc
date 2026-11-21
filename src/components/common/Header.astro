@@ -1,0 +1,262 @@
+---
+import { MAIN_NAVIGATION } from '../../data/navigation';
+import { SITE_CONFIG } from '../../data/site';
+
+const pathname = Astro.url.pathname;
+
+function isHubActive(href: string) {
+  return pathname === href || pathname.startsWith(href);
+}
+---
+
+<header
+  class="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-border-subtle"
+  data-pagefind-ignore
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 gap-4">
+      <!-- Brand Logo -->
+      <a
+        href="/"
+        class="flex items-center gap-2.5 shrink-0 group"
+        aria-label={`${SITE_CONFIG.name} 首页`}
+      >
+        <img
+          src="/images/site-avatar.webp"
+          alt={`${SITE_CONFIG.name} 头像`}
+          width="36"
+          height="36"
+          class="w-9 h-9 rounded-xl object-cover border border-border-subtle shadow-sm group-hover:opacity-90 transition-opacity shrink-0"
+        />
+        <span class="flex flex-col leading-tight">
+          <span class="text-base font-bold text-text-title tracking-tight">{SITE_CONFIG.name}</span>
+          <span class="text-[11px] font-mono text-text-muted">offerairport.cc</span>
+        </span>
+      </a>
+
+      <!-- Desktop 4 Primary Navigation Menus -->
+      <nav aria-label="主导航" class="hidden lg:flex items-center gap-1">
+        {MAIN_NAVIGATION.map((hub) => {
+          const active = isHubActive(hub.href);
+          return (
+            <div class="relative nav-dropdown-group group">
+              <div class="flex items-center">
+                <a
+                  href={hub.href}
+                  class={`px-3.5 py-2 rounded-lg text-[15px] font-medium transition-colors inline-flex items-center gap-1.5 ${
+                    active
+                      ? 'text-brand-primary bg-brand-soft'
+                      : 'text-text-title hover:text-brand-primary hover:bg-bg-surface'
+                  }`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <span>{hub.title}</span>
+                </a>
+                <button
+                  type="button"
+                  class="nav-dropdown-toggle p-1.5 -ml-1 rounded-md text-text-muted hover:text-brand-primary hover:bg-bg-surface transition-colors"
+                  aria-expanded="false"
+                  aria-label={`展开 ${hub.title} 子专题`}
+                >
+                  <svg class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Dropdown Panel -->
+              <div
+                class="nav-dropdown-panel invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-150 absolute left-0 top-full pt-2 w-80 z-50"
+              >
+                <div class="bg-white rounded-2xl border border-border-subtle shadow-xl p-3">
+                  <div class="px-3 py-2 mb-1 border-b border-border-subtle flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                      {hub.title} · 二级专题
+                    </span>
+                    <a href={hub.href} class="text-xs font-medium text-brand-primary hover:underline">
+                      专题首页
+                    </a>
+                  </div>
+                  <ul class="space-y-0.5">
+                    {hub.subtopics.map((sub) => {
+                      const subActive = pathname === sub.href;
+                      return (
+                        <li>
+                          <a
+                            href={sub.href}
+                            class={`block px-3 py-2 rounded-xl transition-colors ${
+                              subActive
+                                ? 'bg-brand-soft text-brand-primary'
+                                : 'hover:bg-bg-surface text-text-title'
+                            }`}
+                          >
+                            <div class="text-sm font-medium">{sub.title}</div>
+                            <div class="text-xs text-text-muted line-clamp-1 mt-0.5">
+                              {sub.description}
+                            </div>
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </nav>
+
+      <!-- Desktop Search + Mobile Menu Button -->
+      <div class="flex items-center gap-2.5">
+        <form action="/search/" method="get" role="search" class="hidden sm:flex items-center relative">
+          <label for="header-search-input" class="sr-only">搜索全站教程、品牌与评测</label>
+          <input
+            id="header-search-input"
+            name="q"
+            type="search"
+            placeholder="搜索 Clash、光速云、TUN..."
+            class="w-48 xl:w-60 pl-9 pr-3 py-1.5 text-sm bg-bg-surface border border-border-subtle rounded-xl text-text-title placeholder:text-text-muted focus:bg-white focus:border-brand-primary transition-all"
+          />
+          <svg class="w-4 h-4 text-text-muted absolute left-3 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+        </form>
+
+        <a
+          href="/search/"
+          class="sm:hidden p-2 rounded-xl border border-border-subtle text-text-title hover:bg-bg-surface"
+          aria-label="全站搜索"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+        </a>
+
+        <button
+          id="mobile-menu-btn"
+          type="button"
+          class="lg:hidden p-2 rounded-xl border border-border-subtle text-text-title hover:bg-bg-surface"
+          aria-expanded="false"
+          aria-controls="mobile-menu-drawer"
+          aria-label="打开导航菜单"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Accordion Drawer -->
+  <div
+    id="mobile-menu-drawer"
+    class="hidden lg:hidden border-t border-border-subtle bg-white max-h-[80dvh] overflow-y-auto"
+  >
+    <div class="px-4 py-4 space-y-3">
+      <form action="/search/" method="get" role="search" class="flex gap-2">
+        <label for="mobile-search-input" class="sr-only">搜索内容</label>
+        <input
+          id="mobile-search-input"
+          name="q"
+          type="search"
+          placeholder="搜索教程、品牌或报错关键词..."
+          class="flex-1 px-3.5 py-2 text-sm bg-bg-surface border border-border-subtle rounded-xl text-text-title"
+        />
+        <button
+          type="submit"
+          class="px-4 py-2 text-sm font-medium bg-brand-primary text-white rounded-xl"
+        >
+          搜索
+        </button>
+      </form>
+
+      <div class="divide-y divide-border-subtle">
+        {MAIN_NAVIGATION.map((hub) => (
+          <details class="py-2 group" open={isHubActive(hub.href)}>
+            <summary class="flex items-center justify-between py-2 text-base font-semibold text-text-title cursor-pointer list-none">
+              <a href={hub.href} class="hover:text-brand-primary mobile-hub-link">
+                {hub.title}
+              </a>
+              <svg class="w-4 h-4 text-text-muted transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+              </svg>
+            </summary>
+            <ul class="mt-1 pl-3 space-y-1 pb-2">
+              <li>
+                <a href={hub.href} class="block py-1.5 text-sm font-medium text-brand-primary">
+                  全部 {hub.title} 专题
+                </a>
+              </li>
+              {hub.subtopics.map((sub) => (
+                <li>
+                  <a
+                    href={sub.href}
+                    class={`block py-1.5 text-sm ${
+                      pathname === sub.href
+                        ? 'text-brand-primary font-semibold'
+                        : 'text-text-body hover:text-brand-primary'
+                    }`}
+                  >
+                    {sub.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))}
+      </div>
+
+      <div class="pt-2 border-t border-border-subtle flex flex-wrap gap-2 text-xs">
+        <a href="/brands/" class="px-3 py-1.5 rounded-lg bg-bg-surface text-text-title font-medium">品牌数据库</a>
+        <a href="/reviews/" class="px-3 py-1.5 rounded-lg bg-bg-surface text-text-title font-medium">独立评测</a>
+        <a href="/comparisons/" class="px-3 py-1.5 rounded-lg bg-bg-surface text-text-title font-medium">横向对比</a>
+        <a href="/offers/" class="px-3 py-1.5 rounded-lg bg-bg-surface text-text-title font-medium">套餐优惠汇总</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  const mobileBtn = document.getElementById('mobile-menu-btn');
+  const mobileDrawer = document.getElementById('mobile-menu-drawer');
+
+  mobileBtn?.addEventListener('click', () => {
+    const expanded = mobileBtn.getAttribute('aria-expanded') === 'true';
+    mobileBtn.setAttribute('aria-expanded', String(!expanded));
+    mobileDrawer?.classList.toggle('hidden');
+  });
+
+  document.querySelectorAll('.mobile-hub-link').forEach((link) => {
+    link.addEventListener('click', (e) => e.stopPropagation());
+  });
+
+  // Keyboard toggle support for desktop dropdown buttons
+  document.querySelectorAll('.nav-dropdown-toggle').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const group = btn.closest('.nav-dropdown-group');
+      const panel = group?.querySelector('.nav-dropdown-panel');
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      document.querySelectorAll('.nav-dropdown-toggle').forEach((b) => {
+        b.setAttribute('aria-expanded', 'false');
+        b.closest('.nav-dropdown-group')?.querySelector('.nav-dropdown-panel')?.classList.remove('!visible', '!opacity-100', '!translate-y-0');
+      });
+      if (!isExpanded && panel) {
+        btn.setAttribute('aria-expanded', 'true');
+        panel.classList.add('!visible', '!opacity-100', '!translate-y-0');
+      }
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.nav-dropdown-toggle').forEach((b) => {
+        b.setAttribute('aria-expanded', 'false');
+        b.closest('.nav-dropdown-group')?.querySelector('.nav-dropdown-panel')?.classList.remove('!visible', '!opacity-100', '!translate-y-0');
+      });
+    }
+  });
+</script>

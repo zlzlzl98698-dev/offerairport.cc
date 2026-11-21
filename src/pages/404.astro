@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="页面未找到 (404)"
+  description="你访问的页面可能已移动或链接有误，可通过全站搜索或四大核心专题导航继续浏览。"
+  disableCanonical={true}
+  noindex={true}
+>
+  <section class="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center space-y-6">
+    <div class="inline-flex items-center px-3 py-1 rounded-full bg-bg-surface border border-border-subtle font-mono text-xs text-text-muted">
+      HTTP 404 · PAGE NOT FOUND
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-text-title">
+      抱歉，该页面不存在或已迁移
+    </h1>
+    <p class="text-base text-text-body max-w-xl mx-auto leading-relaxed">
+      你可以返回首页、使用站内中文全文搜索，或直接进入下方的四大核心专题入口查找教程与品牌档案。
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+      <a href="/" class="px-5 py-2.5 rounded-xl bg-brand-primary text-white font-semibold text-sm hover:bg-brand-primary-hover transition-colors">
+        返回首页
+      </a>
+      <a href="/search/" class="px-5 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-sm hover:border-brand-primary transition-colors">
+        站内搜索
+      </a>
+      <a href="/brands/" class="px-5 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-sm hover:border-brand-primary transition-colors">
+        品牌数据库
+      </a>
+    </div>
+  </section>
+</BaseLayout>

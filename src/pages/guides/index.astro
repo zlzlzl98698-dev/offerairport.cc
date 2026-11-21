@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import ArticleCard from '../../components/cards/ArticleCard.astro';
+import FaqAccordion from '../../components/common/FaqAccordion.astro';
+import { getPublishedTutorials } from '../../utils/content';
+import { buildBreadcrumbSchema, buildCanonicalUrl, buildFaqSchema, type FAQItem } from '../../utils/seo';
+
+const tutorials = await getPublishedTutorials();
+const guides = tutorials.filter((t) => t.data.urlPath.startsWith('/guides/'));
+
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: '跨平台指南', href: '/guides/' },
+];
+
+const guidesFaqs: FAQItem[] = [
+  {
+    question: '为什么「跨平台指南」栏目里的所有文章都没有插入买套餐推广链接？',
+    answer:
+      '本站严格遵循「单站三分区」编辑隔离规范：技术配置、软件安装核验、隐私安全审计与故障排查全部维持纯教程零推广，确保读者无压完成工具搭建。',
+  },
+  {
+    question: '新手刚装系统没有代理打不开 GitHub 怎么安全获取客户端？',
+    answer:
+      '请查阅 [无代理环境冷启动下载指南](/guides/safe-client-download-without-vpn/)：通过已通网备用手机从 GitHub 官方仓传输安装包，再在终端使用 SHA256 比对确认零篡改。',
+  },
+  {
+    question: '安卓和苹果端在安装开源软件时各自最关键的防坑点是什么？',
+    answer:
+      'iOS 绝对不可在系统设置 iCloud 页登录陌生共享账号，且 Shadowrocket/Stash 属外区付费买断工具；Android 优先从官方 GitHub 下 `arm64-v8a` 版并远离 Google Play 上 NekoBox 同名三方接管包。',
+  },
+];
+
+const title = '代理客户端与网络知识实用指南索引';
+const description =
+  '汇总 Windows、macOS、iOS、Android 客户端配置指南、代理协议原理、免费梯子安全审计以及故障转移策略教程。';
+
+const schemas = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: buildCanonicalUrl('/guides/'),
+  },
+  buildFaqSchema(guidesFaqs),
+];
+---
+
+<BaseLayout title={title} description={description} canonicalUrl="/guides/" structuredData={schemas}>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="rounded-3xl bg-bg-surface border border-border-subtle p-6 sm:p-8 mb-6">
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 mb-3">
+        教程与知识区
+      </span>
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-text-title mb-3">
+        跨平台客户端与网络基础知识指南
+      </h1>
+      <p class="text-sm sm:text-base text-text-body max-w-3xl leading-relaxed">
+        本栏目聚焦通用客户端配置与网络基础原理，默认不嵌入商业购买按钮，帮助你在任意服务商环境下独立完成工具配置。
+      </p>
+    </header>
+
+    <section class="mb-8 rounded-2xl border border-border-subtle bg-white overflow-hidden">
+      <div class="px-5 py-3.5 bg-bg-surface border-b border-border-subtle text-sm font-bold text-text-title">
+        按系统平台与核心诉求直达指南（0 推广纯教程）
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[560px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+          <thead>
+            <tr class="bg-bg-surface/60 border-b border-border-subtle text-text-title">
+              <th class="p-3 font-bold">目标环境 / 主题</th>
+              <th class="p-3 font-bold">主打解决的卡点</th>
+              <th class="p-3 font-bold">直达必读篇目</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-subtle text-text-body">
+            <tr>
+              <td class="p-3 font-semibold text-text-title">零基础入门与全平台选型</td>
+              <td class="p-3">理清客户端/订阅/规则层级，查 6 大系统开源软件表</td>
+              <td class="p-3"><a href="/guides/beginner-onboarding-roadmap/" class="text-brand-primary font-semibold hover:underline">四步入门路线图 →</a> / <a href="/guides/cross-platform-proxy-clients/" class="text-brand-primary font-semibold hover:underline">全平台矩阵 →</a></td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-text-title">iOS / Android / macOS / Linux</td>
+              <td class="p-3">区分 arm64 芯片包、外区 ID 防锁机、安卓保活及 v2rayA</td>
+              <td class="p-3"><a href="/guides/ios-proxy-clients-guide/" class="text-brand-primary font-semibold hover:underline">iOS 选型 →</a> / <a href="/guides/android-proxy-clients-guide/" class="text-brand-primary font-semibold hover:underline">Android 避坑 →</a> / <a href="/guides/macos-proxy-clients-guide/" class="text-brand-primary font-semibold hover:underline">Mac →</a></td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-text-title">双活高可用与隐私防泄漏</td>
+              <td class="p-3">Fallback 自动容灾、WebRTC 堵漏及免费 VPN 安全边界</td>
+              <td class="p-3"><a href="/guides/multi-airport-failover-strategy/" class="text-brand-primary font-semibold hover:underline">双活容灾配置 →</a> / <a href="/guides/webrtc-and-timezone-leak-prevention/" class="text-brand-primary font-semibold hover:underline">防泄漏排查 →</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {guides.map((entry) => (
+        <ArticleCard
+          title={entry.data.title}
+          description={entry.data.description}
+          urlPath={entry.data.urlPath}
+          pageType={entry.data.pageType}
+          category={entry.data.category}
+          pubDate={entry.data.pubDate}
+          updatedDate={entry.data.updatedDate}
+          body={entry.body}
+        />
+      ))}
+    </div>
+
+    <FaqAccordion title="跨平台配置指南 FAQ" faqs={guidesFaqs} />
+  </div>
+</BaseLayout>

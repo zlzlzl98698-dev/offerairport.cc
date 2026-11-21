@@ -1,0 +1,138 @@
+---
+import CommercialLayout from '../../layouts/CommercialLayout.astro';
+import { ALL_BRANDS } from '../../data/brands';
+import { computePlanUnitCostSummary } from '../../utils/brand-seo';
+
+export async function getStaticPaths() {
+  return ALL_BRANDS.map((brand) => ({
+    params: { slug: brand.slug },
+    props: { brand },
+  }));
+}
+
+const { brand } = Astro.props;
+const unitCostLines = computePlanUnitCostSummary(brand);
+const monthlyPlans = brand.plans.filter((p) => p.billingCycle === '月付');
+const onetimePlans = brand.plans.filter((p) => p.trafficReset === '一次性不限时');
+
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: '品牌数据库', href: '/brands/' },
+  { name: brand.name, href: `/brands/${brand.slug}/` },
+];
+---
+
+<CommercialLayout brand={brand} breadcrumbs={breadcrumbs}>
+  <h2>{brand.name} 服务定位、线路边界与实付成本拆解</h2>
+  <p>
+    {brand.name}（{brand.englishName}{brand.sinceYear ? `，${brand.sinceYear} 年起有运营记录` : ''}）当前在本站数据库中的定位为：<strong>{brand.positioning}</strong>。
+    线路架构登记为 <strong>{brand.lineType}</strong>，支持协议包括 {brand.protocols.join('、')}，节点标注规模为「{brand.nodeCountLabel}」（覆盖：{brand.nodeRegions.join(' / ')}）。
+  </p>
+
+  <h3>一、套餐结构、计费周期与单 GB 有效成本</h3>
+  {unitCostLines.length > 0 ? (
+    <>
+      <p>
+        为避免被「折合月均价」误导，下面按各档位实付金额与周期内总配额折算 {brand.name} 的单位流量参考成本（{brand.startingPriceIsAmortized ? '注意：最低入门标价为年付折算口径，下单需一次付清全年' : '起步参考直接对应真实短周期标价'}）：
+      </p>
+      <ul>
+        {unitCostLines.map((line) => (
+          <li>{line}</li>
+        ))}
+      </ul>
+      <p>
+        {monthlyPlans.length > 0
+          ? `如果你首次在当前城市宽带环境试水，建议直接从按月结算档位起步，连续验证两个晚高峰（20:00–23:00）后再决定是否切换更长周期。`
+          : `当前档案中未收录独立的低门槛单月付套餐，下单前请务必先通过官方面板确认最新月付可选项及退款限制。`}
+        {onetimePlans.length > 0 && ` 该品牌还提供不限时长按量包，非常适合月均消耗 15GB 以下或用作主备双活容灾订阅。`}
+      </p>
+    </>
+  ) : (
+    <p>
+      {brand.name} 目前在本地历史档案中仅登记了「{brand.startingMonthlyDisplay}」等有限摘要（完整分档价格表尚待官方源核实补齐），本站不推算未核实价格。需要对比透明 18–25 元月付梯队的读者可先转至 <a href="/comparisons/budget-18-25-yuan-airports/">主流高性价比月付对比</a>。
+    </p>
+  )}
+
+  <h3>二、客户端兼容性、设备限制与软路由落地评估</h3>
+  <p>
+    {brand.name} 的接入模式属于「<strong>{brand.clientMode}</strong>」，登记设备策略为「{brand.deviceLimit}」，适用终端涵盖 {brand.supportedClients.join('、')}。
+  </p>
+  {brand.clientMode === '仅专属客户端（无通用订阅）' ? (
+    <p>
+      <strong>第三方工具限制提醒：</strong>
+      {brand.name} 不发放标准 Clash YAML 或 Shadowrocket 订阅地址。它适合不希望学习配置、希望下载登录即用的日常轻度用户；如果你计划接入 <a href="/clash/verge-complete-guide/">Clash Verge Rev</a> 做多机场 <a href="/guides/multi-airport-failover-strategy/">Fallback 故障转移</a>，或部署到 <a href="/comparisons/openclash-vs-passwall2-vs-nikki/">OpenWrt 软路由</a>，则应改选支持第三方通用订阅的服务商。
+    </p>
+  ) : brand.clientMode === '待核实' ? (
+    <p>
+      <strong>待核实提示：</strong>
+      原始清单未明确该品牌是否持续开放标准 Clash/V2Ray 订阅链接。如依赖开源客户端或软路由网关，建议注册后先检查面板导出能力再行付费。
+    </p>
+  ) : (
+    <p>
+      因为开放第三方通用客户端导入，用户可在桌面端直接配合 <a href="/clash/verge-official-download-guide/">Clash Verge Rev</a> 或 <a href="/clash/v2rayn-multi-core-guide/">v2rayN</a> 使用，或依据 <a href="/guides/multi-airport-failover-strategy/">双活备灾配置方案</a> 把该订阅接入常规规则策略组；日常建议坚持开启 <code>Rule</code>（规则模式）并把下载工具设直连，避免浪费额度。
+    </p>
+  )}
+
+  <h3>三、实测证据边界、支付支持与风险提示</h3>
+  <p>
+    当前支持的付款渠道登记为：{brand.paymentMethods.join('、')}。
+    {brand.speedReport
+      ? `测速档案已收录 ${brand.speedReport.testedAt}（${brand.speedReport.environment}）采样记录，共含 ${brand.speedReport.samples.length} 组代表区域观测样本${brand.speedReport.isPeakHour ? '（属晚高峰参考样本）' : '（请注意标注为非晚高峰参考样本，不代表高并发极限稳定性）'}。`
+      : `截至本次核实日（${brand.verifiedAt}），本站暂未抓取到该品牌独立的 32 线程测速快照图片，所有性能标称均属品牌方公开资料范围，请以自行单月实地测试为准。`}
+    完整选型避坑与测速解读方法可对照阅读 <a href="/methodology/">独立评测方法论</a> 与 <a href="/resources/how-to-test-nodes/">测速图核验指南</a>。
+  </p>
+
+  {brand.slug === 'guangsuyun' && (
+    <>
+      <h3>光速云套餐梯队与历史版本差异说明</h3>
+      <p>
+        光速云自 2020 年起运营，是本站重点整理资料的老牌综合型服务商之一。除常规月付档位（极速版 ¥25/168GB、流光版 ¥34/268GB、量子版 ¥68/568GB、无界版 ¥138/900GB）外，还保留了面向低频备用的「致敬斯诺克 147 永久套餐（¥147/247GB 不过期）」与入门「轻量版（¥99/年）」。
+      </p>
+      <p>
+        需特别提醒：原始资料文件首页摘要曾记轻量版为 59GB/月，而同文件套餐明细记录为 69GB/月；此外光速云部分特殊套餐不支持退款，且 ChatGPT 与 Gemini 在不同节点的解锁状态存在差异，建议优先从可月付方案开始实测当地宽带的晚高峰连通率。
+      </p>
+      <h3>光速云实测与截图证据档案</h3>
+      <p>
+        本站已归档光速云 2026-08-11 14:32:56 CST 的节点测速截图及补充实测图集。为确保数据客观，2026-10-19 的参考带宽记录已明确标示为「品牌资料非晚高峰样本」，不作为全天 24 小时保底速率承诺。
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 not-prose">
+        <figure class="rounded-2xl border border-border-subtle bg-bg-surface p-3">
+          <img
+            src="/images/guangsuyun/photo_2026-08-19_12-13-01.jpg"
+            alt="光速云 2026-08-19 实测与解锁记录截图 1"
+            loading="lazy"
+            class="w-full h-auto rounded-xl border border-border-subtle"
+          />
+          <figcaption class="text-xs text-text-muted mt-2">
+            档案截图：photo_2026-08-19_12-13-01（供核对节点状态）
+          </figcaption>
+        </figure>
+        <figure class="rounded-2xl border border-border-subtle bg-bg-surface p-3">
+          <img
+            src="/images/guangsuyun/photo_2026-08-19_12-18-40.jpg"
+            alt="光速云 2026-08-19 实测与解锁记录截图 2"
+            loading="lazy"
+            class="w-full h-auto rounded-xl border border-border-subtle"
+          />
+          <figcaption class="text-xs text-text-muted mt-2">
+            档案截图：photo_2026-08-19_12-18-40（供核对解锁表现）
+          </figcaption>
+        </figure>
+      </div>
+    </>
+  )}
+
+  {brand.clientMode === '仅专属客户端（无通用订阅）' && (
+    <p>
+      <strong>客户端兼容提醒：</strong>
+      {brand.name} 当前采用官方专属客户端模式，不提供标准 Clash / Shadowrocket 订阅链接。如果你的主力环境是 OpenWrt 软路由（OpenClash / PassWall2）或习惯使用 Clash Verge Rev 进行精细化分流，请先评估该接入限制后再做决定。
+    </p>
+  )}
+
+  {brand.dataCompleteness !== 'full' && (
+    <p>
+      <strong>资料核实状态提示：</strong>
+      本品牌部分套餐细则或实测数据目前仍标记为「{brand.dataCompleteness === 'historical' ? '历史存档' : '待核实'}」，本站严格遵循不编造缺失字段的原则，建议访问官网确认当前有效套餐后再行订阅。
+    </p>
+  )}
+</CommercialLayout>

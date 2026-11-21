@@ -1,0 +1,37 @@
+---
+import SEOHead from '../components/seo/SEOHead.astro';
+import Header from '../components/common/Header.astro';
+import Footer from '../components/common/Footer.astro';
+import '../styles/globals.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalUrl?: string;
+  disableCanonical?: boolean;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  author?: string;
+  publishDate?: string;
+  modifiedDate?: string;
+  tags?: string[];
+  structuredData?: object | object[];
+  noindex?: boolean;
+}
+
+const props = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <SEOHead {...props} />
+  </head>
+  <body class="min-h-[100dvh] flex flex-col bg-bg-page text-text-body antialiased">
+    <Header />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,836 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import TableOfContents from '../../components/common/TableOfContents.astro';
+import AffiliateDisclosure from '../../components/commercial/AffiliateDisclosure.astro';
+import { getBrandBySlug } from '../../data/brands';
+import { SITE_CONFIG } from '../../data/site';
+import { buildBreadcrumbSchema, buildCanonicalUrl } from '../../utils/seo';
+import {
+  FREE_CHANNELS_COMPARISON,
+  FREE_CLIENTS_MATRIX,
+  DECISION_BRANCHES,
+  FREE_NODES_FAQS,
+  FREE_NODES_INTERNAL_LINKS,
+} from '../../data/free-nodes-upgrade';
+
+const urlPath = '/resources/free-nodes/';
+const title = '免费节点与免费代理资源全指南：安全边界、真实获取渠道、隔离检测与低成本替代方案';
+const description =
+  '深入剖析公开免费节点（Clash/V2Ray 订阅池）的真实来源、极短存活规律与五大安全风险，提供可核实的开源客户端矩阵、7 步隔离检测实操手册、免费试用核查及低成本不限时替代方案对比。';
+
+const verifiedDate = '2026-11-20';
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: '资源与情报', href: '/resources/' },
+  { name: '免费节点', href: urlPath },
+];
+
+const headings = [
+  { depth: 2, slug: 'channels-comparison', text: '一、免费节点、开源工具与低门槛替代核心对比表' },
+  { depth: 3, slug: 'free-clients-table', text: '可核实永久免费开源客户端清单（不含节点）' },
+  { depth: 2, slug: 'free-node-origins', text: '二、公开免费节点的真实来源、生命周期与运营动机' },
+  { depth: 3, slug: 'three-origins', text: '三大常见公开免费订阅池来源' },
+  { depth: 3, slug: 'why-die-fast', text: '为什么上午还能连、一到晚高峰就全部 Timeout？' },
+  { depth: 3, slug: 'self-hosted-reality', text: '自建免费云方案的隐性门槛与真实维护成本' },
+  { depth: 2, slug: 'security-risks', text: '三、免费节点与免费梯子的五大高危风险与四条红线' },
+  { depth: 3, slug: 'ca-mitm-risk', text: '警惕「安装自定义根证书」与破解版客户端' },
+  { depth: 3, slug: 'four-red-lines', text: '必须守住的四条隔离操作红线' },
+  { depth: 2, slug: 'isolated-testing', text: '四、零账号暴露下安全获取客户端与检测节点的 7 步实操' },
+  { depth: 3, slug: 'step-cold-start', text: '第 1–2 步：冷启动获取官方包并执行 SHA256 哈希核验' },
+  { depth: 3, slug: 'step-isolate-verify', text: '第 3–5 步：建立无痕隔离环境与读懂 RTT / 32 线程测速快照' },
+  { depth: 3, slug: 'step-dns-unlock', text: '第 6–7 步：DNS / IPv6 防泄漏校验与流媒体 / AI 分级实测' },
+  { depth: 3, slug: 'import-errors-checklist', text: '导入订阅失败与开启代理后无网络的 4 项快速自检' },
+  { depth: 3, slug: 'cleanup-after-test', text: '测试完成后的环境清理与各端隔离细节' },
+  { depth: 2, slug: 'technical-principles', text: '五、直接影响判断的核心技术原理（协议、线路与分流）' },
+  { depth: 3, slug: 'protocol-behavior', text: 'Shadowsocks、VLESS-Reality 与 Hysteria 2 在弱网下的差异' },
+  { depth: 3, slug: 'ping-vs-http-truth', text: '为什么测速显示绿色低延迟，实际网页依然打不开？' },
+  { depth: 3, slug: 'routing-and-billing', text: 'Fake-IP、TUN 模式与倍率 / 年付折算文字游戏' },
+  { depth: 2, slug: 'decision-branches', text: '六、按场景、预算与风险承受能力的五条决策分支' },
+  { depth: 2, slug: 'low-cost-alternatives', text: '七、可核实的获取客户端与低门槛替代入口（含完整数据披露）' },
+  { depth: 3, slug: 'cost-break-even', text: '长期总支出对比：免费时间损耗 vs 不限时包 vs 包月/年付' },
+  { depth: 3, slug: 'pre-order-checklist', text: '下单任何替代方案前必查的四项条款' },
+  { depth: 2, slug: 'faq', text: '八、免费节点与替代选择高频边界问题 FAQ（10 问）' },
+  { depth: 2, slug: 'related-clusters', text: '九、站内主题聚类与延伸学习导航' },
+];
+
+const altBrandSlugs = ['guangsuyun', 'weitu', 'ermao', 'yifan', 'xingdaomeng', 'wuyou'];
+const altBrands = altBrandSlugs
+  .map((s) => getBrandBySlug(s))
+  .filter((b): b is NonNullable<typeof b> => Boolean(b));
+
+const schemas = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: buildCanonicalUrl(urlPath),
+    inLanguage: 'zh-CN',
+    dateModified: verifiedDate,
+    author: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.author,
+    },
+    isPartOf: {
+      '@type': 'WebSite',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.domain,
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FREE_NODES_FAQS.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.answer,
+      },
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={urlPath}
+  ogType="article"
+  author={SITE_CONFIG.author}
+  publishDate="2026-10-20T00:00:00Z"
+  modifiedDate={`${verifiedDate}T18:20:00+08:00`}
+  tags={['免费节点', '免费梯子', 'Clash免费节点', '免费VPN风险', '不限时流量包', '节点检测']}
+  structuredData={schemas}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Main Content Column -->
+      <article class="lg:col-span-8 min-w-0 space-y-10" data-pagefind-body>
+        <!-- Header & Answer-First Executive Conclusion -->
+        <header class="rounded-3xl bg-bg-surface border border-border-subtle p-6 sm:p-8 space-y-5">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="px-2.5 py-1 rounded-full bg-brand-soft text-brand-primary border border-blue-200 font-semibold">
+              资源与情报 · 二级专题专著指南
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-white text-text-title border border-border-subtle font-mono">
+              核实与更新：{verifiedDate}
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-white text-text-muted border border-border-subtle">
+              维护：{SITE_CONFIG.author}
+            </span>
+          </div>
+
+          <h1 class="text-2xl sm:text-4xl font-extrabold text-text-title leading-tight">
+            免费节点安全指南与可用替代方案：真实来源、失效规律、检测流程与低成本选型
+          </h1>
+
+          <!-- Answer-First Direct Conclusion -->
+          <div class="rounded-2xl bg-white border border-blue-200 p-5 space-y-3 shadow-sm">
+            <div class="flex items-center gap-2 text-sm font-bold text-brand-primary">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+              </svg>
+              <span>核心结论先看这里（Answer-First）</span>
+            </div>
+            <p class="text-sm sm:text-base text-text-title leading-relaxed font-medium">
+              <strong>网上流传的公开免费节点平均可用寿命往往只有数小时至两天，且普遍存在流量嗅探、AI 账号封禁与晚高峰断流问题，仅适合在无痕隔离状态下临时查阅公开资料或下载正版开源客户端。</strong>
+            </p>
+            <p class="text-sm text-text-body leading-relaxed">
+              真正可核实且永久零费用的资源是<strong>开源代理客户端本身</strong>（如 Clash Verge Rev、FlClash、v2rayN、v2rayNG、Hiddify、Karing）；至于海外网络出口带宽，本站不会为了充数而转发来源不明、随时失效的匿名订阅链接。如果你每月真实需求极低，最划算、风险可控的替代路线是「<strong>开源通用客户端 + 百元级一次性不限时流量包</strong>」；如果是每日高频 AI 办公与开发，则应选择支持第三方订阅的 <strong>¥18–¥25/月标准月付专线</strong>先行实测。
+            </p>
+            <div class="flex flex-wrap gap-2.5 pt-1 text-xs">
+              <a href="#channels-comparison" class="px-3.5 py-2 rounded-xl bg-brand-primary text-white font-semibold hover:bg-brand-primary-hover transition-colors">
+                看渠道与开源客户端对比表
+              </a>
+              <a href="#isolated-testing" class="px-3.5 py-2 rounded-xl bg-bg-surface border border-border-subtle text-text-title font-semibold hover:border-brand-primary transition-colors">
+                7 步安全隔离自测教程
+              </a>
+              <a href="#decision-branches" class="px-3.5 py-2 rounded-xl bg-bg-surface border border-border-subtle text-text-title font-semibold hover:border-brand-primary transition-colors">
+                按预算找替代方案
+              </a>
+            </div>
+          </div>
+
+          <p class="text-xs text-text-muted leading-relaxed">
+            <strong>数据边界声明：</strong>本页面全部客户端渠道与替代套餐数据均严格对照本地已审计文件《第三方代理客户端.txt》、《32家机场品牌清单.txt》、《光速云品牌信息.txt》与《2026-08-11 测速实测资料包》，不编造免费节点存活率百分比，也不将年付折算月均价伪装成按月单买价格。
+          </p>
+        </header>
+
+        <!-- Mobile TOC -->
+        <div class="lg:hidden">
+          <TableOfContents headings={headings} />
+        </div>
+
+        <!-- H2 #1: Core Comparison Table -->
+        <section id="channels-comparison" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            一、免费节点、开源工具与低门槛替代核心对比表
+          </h2>
+          <p class="text-base text-text-body leading-relaxed">
+            用户搜索「免费节点」时，往往把「代理客户端软件免费」和「海外服务器节点流量免费」混为一谈。事实上，软件层在桌面与安卓端已经拥有极其成熟且完全开源免费的生态，而真正存在成本门槛和风险分水岭的是<strong>服务端节点与跨境带宽出口</strong>。下表按真实成本、流量机制、协议兼容、稳定度、AI/流媒体表现及风险边界，将当前可接触到的六类路径放在同一套标尺下对比。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 1：六类免费节点与低门槛替代方案横向对比</span>
+              <span class="text-xs text-text-muted">手机端可左右滑动查看完整列 · 核实日期：{verifiedDate}</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[620px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-semibold w-[22%]">渠道与实际门槛</th>
+                    <th class="p-3 sm:p-3.5 font-semibold w-[24%]">流量周期与客户端/协议</th>
+                    <th class="p-3 sm:p-3.5 font-semibold w-[25%]">晚高峰与 AI / 流媒体</th>
+                    <th class="p-3 sm:p-3.5 font-semibold w-[29%]">主要限制、风险与来源</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle">
+                  {FREE_CHANNELS_COMPARISON.map((row) => (
+                    <tr class="hover:bg-bg-surface/40 align-top">
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1">
+                        <div class="font-semibold text-text-title">{row.category}</div>
+                        <div class="text-xs font-medium text-brand-primary">{row.cost}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 text-text-body leading-relaxed space-y-1">
+                        <div>{row.quotaAndCycle}</div>
+                        <div class="text-xs text-text-muted">{row.clientsAndProtocols}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 text-text-body leading-relaxed space-y-1">
+                        <div>{row.stability}</div>
+                        <div class="text-xs text-text-muted">{row.aiAndStreaming}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 text-text-body leading-relaxed space-y-1">
+                        <div>{row.limitsAndRisks}</div>
+                        <div class="text-xs text-text-muted">{row.verifiedNote}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 id="free-clients-table" class="text-lg sm:text-xl font-bold text-text-title pt-3 scroll-mt-24">
+            可核实永久免费的开源代理客户端清单（仅本地软件，不含节点）
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            无论是测试临时获取的公开单节点，还是后续接入个人自建服务器或正规订阅服务，<strong>软件客户端本身都不需要花钱购买任何所谓「会员破解版」</strong>。下表整理自《第三方代理客户端》资料库，覆盖六大系统平台的可核实开源工具、底层核心与官方获取注意事项。其中需要特别留意：iOS 端由于 App Store 地区政策与开发者定价差异，Shadowrocket（小火箭）、Stash 和 Quantumult X 在美区均显示为付费买断应用，Surge 含内购订阅，而 Karing、Clash Mi、sing-box (SFI) 与 Streisand 则属于可关注的免费选项（具体上架与售价以所属地区 App Store 为准）。
+          </p>
+
+          <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+            <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+              <span class="text-sm font-bold text-text-title">表 2：全平台正规免费开源客户端核心矩阵</span>
+              <span class="text-xs text-text-muted">来源：《第三方代理客户端.txt》</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[600px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+                <thead>
+                  <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+                    <th class="p-3 sm:p-3.5 font-semibold w-[22%]">系统与客户端</th>
+                    <th class="p-3 sm:p-3.5 font-semibold w-[22%]">内核与授权费用</th>
+                    <th class="p-3 sm:p-3.5 font-semibold w-[26%]">官方可信渠道</th>
+                    <th class="p-3 sm:p-3.5 font-semibold w-[30%]">核实注意事项</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle">
+                  {FREE_CLIENTS_MATRIX.map((c) => (
+                    <tr class="hover:bg-bg-surface/40 align-top">
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1">
+                        <div class="font-semibold text-brand-primary">{c.clientName}</div>
+                        <div class="text-xs font-medium text-text-title">{c.platform}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 leading-relaxed space-y-1">
+                        <div class="font-mono text-xs text-text-body">{c.coreEngine}</div>
+                        <div class="text-xs text-text-muted">{c.licenseCost}</div>
+                      </td>
+                      <td class="p-3 sm:p-3.5 text-text-body leading-relaxed">{c.officialSource}</td>
+                      <td class="p-3 sm:p-3.5 text-xs text-text-body leading-relaxed">{c.cautionNote}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- H2 #2: Free Node Origins & Lifecycle -->
+        <section id="free-node-origins" class="scroll-mt-24 space-y-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            二、公开免费节点的真实来源、生命周期与运营动机
+          </h2>
+          <p class="text-base text-text-body leading-relaxed">
+            理解「免费节点到底是谁搭的、为什么要免费放出来」，是决定你敢不敢在上面登录账号、以及为什么不该把日常工作流寄托在免费节点上的根本前提。服务器租用、公网 BGP 带宽以及跨境 IEPL 专线每月都需要持续支付真金白银，互联网上不存在长期稳定运转却完全没有任何商业或隐性诉求的「无限免费高速专线」。
+          </p>
+
+          <h3 id="three-origins" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            1. 三大常见公开免费订阅池的真实来源
+          </h3>
+          <div class="space-y-3 text-base text-text-body leading-relaxed">
+            <p>
+              <strong>第一类：自动化爬虫全网扫描与个人误泄露配置。</strong>在 GitHub 公开仓库或某些聚合节点分享频道里，最常见的免费订阅本质上是脚本定期扫描互联网开放代理端口、或者从公开代码库误提交的配置文件中抓取出来的节点集合。这类节点的原主人随时可能发现异常流量并修改密码、关闭端口或重置订阅 Token，因此其存活具有高度随机性，经常出现「刚导入时测速正常，半小时后全部变红超时」的现象。
+            </p>
+            <p>
+              <strong>第二类：服务商或个人站长的限时引流体验池。</strong>部分机场商家、测速博主或导航站为了吸引新用户访问，会主动开放一条或数条公共体验节点，或者提供极小额度的注册体验包（例如限速 2–5Mbps、仅开放少量非核心地区、或限制几百 MB 流量）。这类来源相对前一种更可控，但一旦该订阅链接被二次搬运到各大群聊和搜索引擎，瞬间涌入的上千台设备会在几分钟内把节点带宽挤爆，导致绝大多数后续连入的用户根本打不开网页。
+            </p>
+            <p>
+              <strong>第三类：恶意流量嗅探蜜罐与灰色变现节点。</strong>这是风险最高但外观与普通节点完全无异的一类。某些运营者专门使用极低成本甚至黑产肉鸡搭建免费节点并主动广泛传播，目的就是吸引缺乏安全意识的用户通过它发起网络请求。通过分析经过该节点的所有明文 DNS 查询、未加密 HTTP 报文或客户端特征，运营者可以批量收集敏感凭证、向网页注入推广重定向脚本，甚至借用免费 App 反向利用你的本地宽带。
+            </p>
+          </div>
+
+          <h3 id="why-die-fast" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            2. 为什么公开免费节点经常「上午能用、一到晚上就全部 Timeout」？
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            公开免费节点的失效并非偶然，而是同时受到<strong>三层物理与风控机制叠加挤压</strong>的结果：
+          </p>
+          <ul class="list-disc pl-6 space-y-2 text-base text-text-body leading-relaxed">
+            <li>
+              <strong>国际出口晚高峰拥堵效应：</strong>免费节点受限于成本，几乎不可能采购昂贵的 IEPL 或 IPLC 内网跨境专线，清一色走普通公网直连线路。每逢北京时间 20:00 至 23:30 晚高峰时段，三大运营商国际出口链路丢包率与往返延迟急剧飙升，公网免费节点首当其冲发生 TCP 重传雪崩。
+            </li>
+            <li>
+              <strong>多用户并发抢占与服务商配额耗尽：</strong>一条公开订阅被发到网上后，不仅有正常浏览网页的人在用，还会立刻引来自动测速机器人、多线程下载脚本甚至恶意爬虫。一旦某个免费体验账户当月几百 GB 流量在两小时内被刷穿，服务端即刻统一切断认证，所有连接表现均为全员 Timeout。
+            </li>
+            <li>
+              <strong>目标站点与防火墙双重封锁：</strong>大量匿名并发且具备相似特征的流量长期集中冲击同一批固定 IP 和端口，不仅极易触发网络层阻断，还会被 Cloudflare、Google、OpenAI、Netflix 等海外平台自动标注为「高危公共代理」，表现为频繁弹图形验证码、API 拒绝服务或视频画面降级锁区。
+            </li>
+          </ul>
+          <p class="text-sm text-text-muted bg-bg-surface rounded-xl p-4 border border-border-subtle">
+            <strong>资料缺口说明：</strong>由于公开免费节点池处于无 SLA、分钟级动态上下线状态，任何宣称「实测免费节点全年稳定率 99%」的数字都缺乏长期可复现证据。本页面严格遵守不编造原则，不给出虚构的免费节点平均速率或固定存活率。
+          </p>
+
+          <h3 id="self-hosted-reality" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            3. 「自己用免费云服务器或边缘节点自建」真的零成本、更好用吗？
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            不少技术教程会建议用户利用某些海外云厂商的免费体验层（如早期 Oracle Cloud 永久免费小鸡、Cloudflare Workers 代理脚本或教育优惠服务器）自己搭建单节点。客观而言，如果你本身具备 Linux 命令行、Nginx/TLS 证书配置与域名解析基础，自建单节点的最大好处是<strong>IP 仅自己独享、完全不存在被他人连坐触发 AI 风控的问题</strong>；但它同样存在四项容易被新手低估的隐性门槛：
+          </p>
+          <ul class="list-disc pl-6 space-y-1.5 text-base text-text-body leading-relaxed">
+            <li><strong>前置实名与外币信用卡门槛：</strong>主流正规海外云厂商注册免费层几乎全部要求绑定双币信用卡（Visa/Mastercard）甚至触发人工风控审核，很多国内学生根本无法通过验证。</li>
+            <li><strong>公网直连无专线护航：</strong>免费云主机位于普通国际公网路由上，一旦遇到跨网晚高峰拥堵或 IP 端口遭到封锁，换 IP、迁移机房和套 CDN 优选都需要耗费大量排查时间。</li>
+            <li><strong>识别「假更新采集站」的方法：</strong>搜索引擎中大量标题写着「2026 年每天自动更新 100 个免费节点」的页面，实际上只是后台定时拼接同一批早已过期的测试文本，或利用失效订阅把访客导流到不明压缩包下载页。判断标准很简单：看页面是否敢明确列出测试时间戳、测试后端与失效清理机制，而不是只放一堆无法验证的跳转按钮。</li>
+          </ul>
+        </section>
+
+        <!-- H2 #3: Security Risks & Red Lines -->
+        <section id="security-risks" class="scroll-mt-24 space-y-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            三、免费节点与免费梯子的五大高危风险与四条红线
+          </h2>
+          <p class="text-base text-text-body leading-relaxed">
+            如果免费节点仅仅是「慢一点、经常连不上」，那最多只是浪费时间；真正需要警惕的是安全层面的不可逆损失。在技术层面，当你把本机全部流量交给一个未知来源的代理服务端或闭源客户端时，你交出的不仅是网速，还包括了<strong>通信出口身份与本地设备权限</strong>。
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-2xl border border-rose-200 bg-rose-50/40 p-5 space-y-2">
+              <h3 class="text-base font-bold text-rose-950">风险一：HTTP 明文嗅探与响应篡改</h3>
+              <p class="text-sm text-rose-900 leading-relaxed">
+                虽然现代主流网站已普及 HTTPS，但部分老旧网站、局域网接口、软件自动更新检测链接以及非加密 DNS 请求仍可能以明文传输。恶意出口节点可直接记录你的访问习惯，或在未加密网页响应中插入广告 JS 与钓鱼下载按钮。
+              </p>
+            </div>
+            <div class="rounded-2xl border border-rose-200 bg-rose-50/40 p-5 space-y-2">
+              <h3 class="text-base font-bold text-rose-950">风险二：住宅代理寄生（带宽反被他人利用）</h3>
+              <p class="text-sm text-rose-900 leading-relaxed">
+                多份移动端隐私审计曾揭露：部分打着「永久免费不限流 VPN」旗号的来路不明应用或浏览器扩展，会在后台将安装者的家庭宽带 IP 打包进第三方住宅代理池转售。别人通过你的宽带 IP 访问敏感或违规业务，风险记录却直接落在你的本地宽带账户名下。
+              </p>
+            </div>
+            <div class="rounded-2xl border border-amber-200 bg-amber-50/40 p-5 space-y-2">
+              <h3 class="text-base font-bold text-amber-950">风险三：AI 工具与高价值账号连坐风控</h3>
+              <p class="text-sm text-amber-900 leading-relaxed">
+                OpenAI（ChatGPT）、Anthropic（Claude）、Google Gemini 与海外支付/电商平台会对每个请求来源 IP 进行信誉评分。如果你用成千上万人共享的免费节点注册或登录主力账号，极易因同 IP 上存在大量批量注册与滥用记录而被连坐封号，找回申诉成本远高于订阅本身。
+              </p>
+            </div>
+            <div class="rounded-2xl border border-amber-200 bg-amber-50/40 p-5 space-y-2">
+              <h3 class="text-base font-bold text-amber-950">风险四：山寨仿冒客户端与 Play 商店替换包</h3>
+              <p class="text-sm text-amber-900 leading-relaxed">
+                国内搜索引擎竞价广告中存在大量高仿 Clash Verge 下载站；同时《第三方代理客户端》资料已特别发出安全警示：<strong>NekoBox 官方维护资源有限，且明确警告用户不要使用 Google Play 上已被第三方控制的同名 NekoBox 版本</strong>。一旦安装恶意改包，本地保存的所有节点密码与剪贴板加密货币地址都可能被静默窃取。
+              </p>
+            </div>
+          </div>
+
+          <h3 id="ca-mitm-risk" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            风险五（最致命）：警惕要求「安装自定义根证书 (CA)」的免费工具
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            正常的网络代理客户端（如 Clash Verge Rev、v2rayNG、Shadowrocket）工作在传输转发层，<strong>只需要系统的「代理设置」或「VPN 虚拟网卡描述文件」权限，永远不需要向你的操作系统或手机安装额外的受信任根证书（CA Certificate）</strong>。如果任何号称「免费加速、防封锁」的软件或脚本在安装时弹出引导，要求你在 Windows 证书管理器或 iOS「设置 → 通用 → 关于本机 → 证书信任设置」中手动信任一张未知机构签发的根证书，这意味着对方将拥有对你所有 HTTPS 银行登录、邮箱收发与聊天传输进行<strong>中间人解密（MitM）</strong>的最高能力，必须立刻中止安装并彻底卸载。
+          </p>
+
+          <div id="four-red-lines" class="rounded-2xl bg-[#0B1220] text-slate-100 border border-slate-800 p-5 sm:p-6 space-y-3 scroll-mt-24">
+            <div class="text-xs font-mono text-rose-400 uppercase tracking-wider">Security Baseline · 四条绝对不可逾越的操作红线</div>
+            <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-200 leading-relaxed">
+              <li><strong>绝不在免费或未知节点下登录个人核心资产账号：</strong>包括但不限于 Google 主账号、Apple ID、GitHub 私有仓库、企业邮箱、支付宝/网银以及任何数字资产钱包。</li>
+              <li><strong>绝不从国内搜索竞价广告或陌生网盘下载代理客户端：</strong>所有开源软件仅限从项目官方 GitHub Releases 或可信外区官方应用商店获取，并养成核对 SHA256 校验值的习惯。</li>
+              <li><strong>绝不授予代理工具无关权限与系统根证书信任：</strong>纯网络代理不需要读取通讯录、短信、相册、定位，也不需要安装自定义 CA 根证书。</li>
+              <li><strong>绝不用公共免费节点跑大流量下载或 P2P 种子：</strong>既会瞬间耗尽公共带宽殃及他人，也会暴露本地真实请求特征并极易触发目标主机滥用拦截。</li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- H2 #4: 7-Step Isolated Verification Workflow -->
+        <section id="isolated-testing" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            四、零账号暴露下安全获取客户端与检测节点的 7 步实操手册
+          </h2>
+          <p class="text-base text-text-body leading-relaxed">
+            当你确实只打算临时测试一个公开节点、或者刚刚完成系统重装处于「还没有任何代理工具的冷启动状态」需要获取正版软件并验证可用性时，请严格遵循以下 7 个顺序步骤执行。整个过程可在 10 分钟内完成，且将风险隔离在最低限度。
+          </p>
+
+          <h3 id="step-cold-start" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            第 1 步：冷启动阶段获取官方开源客户端（区分架构，拒绝山寨）
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            对于桌面端用户，目前优先选择基于 Mihomo 内核的 <strong>Clash Verge Rev</strong>（若需要同时管理单条 <code>vless://</code> / <code>vmess://</code> 分享链接与通用订阅，则选 <strong>v2rayN</strong>）。如果你当前电脑直连访问 GitHub Releases 较慢，可借用已联网手机下载官方安装文件后传回电脑，或参照<a href="/guides/safe-client-download-without-vpn/" class="text-brand-primary underline">无代理环境安全获取开源客户端指南</a>。下载时务必核对 CPU 架构：Windows 常见电脑选 <code>x64-setup.exe</code>；macOS M1/M2/M3/M4 芯片务必选 <code>aarch64.dmg</code>，Intel 老款 Mac 选 <code>x64.dmg</code>；Android 手机选 <code>arm64-v8a.apk</code>。
+          </p>
+
+          <h3 class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            第 2 步：运行安装包前，用一行终端命令核对 SHA256 数字指纹
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            不论安装包来自朋友转发还是临时加速渠道，只要文件没有被篡改植入木马，其 SHA256 散列值一定与 GitHub 官方 Releases 页面公布的文本完全一致。在安装包所在文件夹打开终端执行校验（详见<a href="/clash/verify-client-checksum/" class="text-brand-primary underline">安装包 SHA256 哈希校验完整指南</a>）：
+          </p>
+          <pre class="rounded-xl bg-[#0F172A] text-slate-100 p-4 text-xs sm:text-sm overflow-x-auto font-mono leading-relaxed"><code># Windows PowerShell 校验示例
+Get-FileHash .\Clash.Verge_x.x.x_x64-setup.exe -Algorithm SHA256
+
+# macOS Terminal 校验示例
+shasum -a 256 ~/Downloads/Clash.Verge_x.x.x_aarch64.dmg
+
+# Linux 校验示例
+sha256sum Clash.Verge_*.deb</code></pre>
+          <p class="text-sm text-text-body leading-relaxed">
+            macOS 首次启动开源软件如遇到 Gatekeeper 提示「已损坏或无法验证开发者」，仅在确认上述 SHA256 完全匹配的前提下，运行 <code>sudo xattr -rd com.apple.quarantine "/Applications/Clash Verge.app"</code> 解除隔离即可。
+          </p>
+
+          <h3 id="step-isolate-verify" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            第 3 步：建立隔离测试环境（浏览器独立 Profile 与无痕模式）
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            在导入任何陌生免费节点之前，先在 Chrome 或 Edge 右上角头像处新建一个空白的<strong>「访客 / 测试专用配置文件（Profile）」</strong>，或全程使用无痕窗口（<code>Ctrl+Shift+N</code>），并确保该测试配置文件里<strong>没有任何已保存的网站密码、Cookie 登录态和第三方代理扩展（如 SwitchyOmega 冲突规则）</strong>。这样即使测试节点出口存在干扰或嗅探，也不会污染你日常主用浏览器中的登录状态与历史轨迹。
+          </p>
+
+          <h3 class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            第 4 步：导入陌生订阅或单节点前的安全检查
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            当你从网上复制一条公开订阅 URL 或单节点分享链接准备测试时，切记以下三点：
+          </p>
+          <ul class="list-disc pl-6 space-y-1.5 text-base text-text-body leading-relaxed">
+            <li><strong>先用文本模式审视订阅规则：</strong>部分来路不明的 Clash YAML 订阅可能会在 <code>rules:</code> 里夹带将国内网银或特定域名劫持到恶意出口的规则。测试陌生配置时，可先只保留节点列表，或者配合本地干净的分流模板使用（参考<a href="/clash/verge-rules-and-proxy-groups/" class="text-brand-primary underline">Clash Verge 分流规则实战</a>）。</li>
+            <li><strong>关闭「允许局域网连接（Allow LAN）」：</strong>防止公共 Wi-Fi 同网段其他陌生人通过 <code>7897</code> 端口反向连接你的本地客户端。</li>
+            <li><strong>确保系统时间与标准时间误差在 60 秒以内：</strong>VMess、VLESS 与 TLS 握手严格校验时间戳，时间不对会导致哪怕节点有效也全员显示 <code>Timeout</code>（完整排障可查看<a href="/clash/fix-node-timeout-errors/" class="text-brand-primary underline">节点全部 Timeout 超时九步排查法</a>）。</li>
+          </ul>
+
+          <h3 class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            第 5 步：测试真实延迟与速度——别被单次峰值数字欺骗
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            节点导入后，在客户端执行延迟测速（若默认的 <code>gstatic.com/generate_204</code> 在当前网络响应偏慢，可在设置中更换为 <code>http://cp.cloudflare.com/generate_204</code> 测试）。对照本站整理的<a href="/resources/how-to-test-nodes/" class="text-brand-primary underline">科学解读节点测速截图教程</a>，一次有效检测应当关注四项指标而非单一「最高峰值」：
+          </p>
+          <ol class="list-decimal pl-6 space-y-1.5 text-base text-text-body leading-relaxed">
+            <li><strong>HTTP / HTTPS 真实响应延迟 vs 纯握手 RTT：</strong>不少超载免费节点 TCP 握手延迟看似只有 80ms，但真正建立 HTTPS 网页请求耗时却高达 2000ms 以上，打开页面依然转圈卡顿。</li>
+            <li><strong>测试时段（是否处于 20:00–23:00 晚高峰）：</strong>凌晨测得高速不代表晚上可用。</li>
+            <li><strong>单线程连续稳定度：</strong>打开一个 1080P 视频或下载一个 50MB 开源小包，观察速率曲线是否断崖式跌零或频繁断流。</li>
+            <li><strong>UDP 转发状态：</strong>查看节点是否标记支持 UDP（Free/FullCone vs Unknown），直接关系到语音通话、QUIC 网页加速与联机游戏能否建立连接。</li>
+          </ol>
+
+          <h3 id="step-dns-unlock" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            第 6–7 步：验证 DNS / IPv6 防泄漏，并分级核实 IP 纯净度与解锁
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            很多用户连上代理后发现「明明开了美国节点，网页却显示我的真实省市宽带 DNS，或者加载转圈十秒才打开」。这通常是因为本地存在 <strong>DNS 泄漏</strong> 或 <strong>IPv6 双栈绕行</strong>。在测试窗口访问 <code>ipleak.net</code> 与 <code>ping0.cc</code> 完成两项验证：
+          </p>
+          <ul class="list-disc pl-6 space-y-1.5 text-base text-text-body leading-relaxed">
+            <li>如果 DNS 检测列表中出现了本地运营商省市 IP，请在 Clash 配置中开启 <code>enhanced-mode: fake-ip</code> 并通过 <code>nameserver-policy</code> 将海外域名指向远程加密 DoH（完整模板见<a href="/clash/dns-fakeip-configuration-guide/" class="text-brand-primary underline">Clash Meta DNS 防泄漏与 Fake-IP 指南</a>）。</li>
+            <li>如果本地路由器分配了公网 IPv6 但测试节点仅支持 IPv4，务必在设置中关闭 IPv6 或在覆写配置写明 <code>dns.ipv6: false</code>，避免浏览器死等 IPv6 超时（参考<a href="/resources/ipv6-conflict-and-dual-stack-fix/" class="text-brand-primary underline">双栈网络 IPv6 冲突解决指南</a>）。</li>
+            <li>验证解锁时切勿只看能否打开首页：Netflix 需点开非自制版权剧集确认播放按钮是否正常出现；YouTube 需留意左上角地区代码是否被「送中（无地区码）」；ChatGPT/Claude 则必须先避开香港出口地区再核验是否弹出风控拦截（详见<a href="/resources/ip-purity-and-unlock-check/" class="text-brand-primary underline">IP 纯净度与 AI/流媒体解锁检测教程</a>）。</li>
+          </ul>
+
+          <h3 id="import-errors-checklist" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            导入订阅失败与开启代理后无网络的 4 项快速自检
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            新手在测试免费节点或首次导入机场订阅时，如果软件弹出报错提示或打开网页毫无反应，不必立刻认定节点坏了，按以下四项排障即可快速定位：
+          </p>
+          <ul class="list-disc pl-6 space-y-1.5 text-base text-text-body leading-relaxed">
+            <li><strong>排查订阅格式错配（<code>invalid YAML</code>）：</strong>很多公开链接其实是 Base64 编码的通用 V2Ray 节点列表，直接粘贴进 Clash Verge Rev 会报 YAML 解析错误。此时可先用多格式通吃的 <strong>v2rayN</strong> 或 <strong>Hiddify</strong> 直接导入测试，或在订阅「编辑信息」尝试修改 <code>User-Agent</code> 为 <code>clash.meta</code>（参考<a href="/clash/subscription-format-conversion/" class="text-brand-primary underline">订阅格式兼容处理指南</a>）。</li>
+            <li><strong>排查代理回环死锁与 <code>403</code> 拒绝：</strong>若旧配置已经断网且勾选了「通过系统代理更新」，点击更新订阅就会永远超时。请先关闭「系统代理」直连刷新；若遇 Cloudflare 防火墙返回 <code>403 Forbidden</code>，修改订阅请求 UA 为 <code>clash-verge/v2.0.0</code> 通常即可放行（详见<a href="/clash/fix-subscription-update-failed/" class="text-brand-primary underline">订阅更新失败解决大全</a>）。</li>
+            <li><strong>排查浏览器扩展端口抢占：</strong>若曾在 Chrome 或 Edge 装过 SwitchyOmega / ZeroOmega 等插件并手写过 <code>7890</code> 端口（旧版 Clash for Windows 默认端口），而 Clash Verge Rev 默认混合端口是 <code>7897</code>，两者端口不一致会导致整个浏览器断网。请将插件改为「系统代理」或更新端口为 <code>7897</code>。</li>
+            <li><strong>排查客户端与内核版本过老：</strong>停更的旧版 Clash 无法解析 VLESS-Reality 与 Hysteria 2，会出现节点列表空白或连接报错。请确保运行在 Mihomo v1.18+ 内核环境（见<a href="/clash/migrate-from-cfw-to-verge/" class="text-brand-primary underline">从旧版 Clash 迁移到 Verge Rev 教程</a>）。</li>
+          </ul>
+
+          <h3 id="cleanup-after-test" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            测试完成后的环境清理与各端（Win / Mac / Android / iOS）隔离细节
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            临时测试结束或决定弃用某个公开免费订阅后，务必顺手做好收尾清理，避免残留的恶意规则或系统代理设置影响正常网络：
+          </p>
+          <ul class="list-disc pl-6 space-y-1.5 text-base text-text-body leading-relaxed">
+            <li><strong>Windows / macOS 桌面端：</strong>在 Clash Verge Rev「订阅」页面删除临时导入的陌生免费配置文件，点击关闭「系统代理」与「TUN 模式」后观察本机是否恢复直连；如果电脑异常断电重启后发现浏览器打不开国内网站，进入 Windows「设置 → 网络和 Internet → 代理」手动关闭「使用代理服务器」即可恢复。</li>
+            <li><strong>Android 手机端：</strong>强烈建议在客户端的「应用访问控制 / 分应用代理」中启用黑名单绕过，将微信、支付宝、手机银行及企业办公软件全部排除在代理隧道之外；若曾使用来路不明的免费 App，卸载后建议检查系统「设置 → VPN」与「设备管理器」确保无残留配置。</li>
+            <li><strong>iOS / iPadOS 端：</strong>若需要切换外区 Apple ID 下载正规代理工具，<strong>务必只在蓝色 App Store 商店右上角登录切换，绝对不要在手机「系统设置 → 顶部 iCloud」中登录他人共享账号</strong>，下完软件后第一时间退出并切回自己的常用账号。</li>
+            <li><strong>防订阅泄漏复核：</strong>如果你在测试过程中为了格式兼容不小心把自己的私人订阅地址提交给了未知第三方在线转换网页，测试结束后请立即前往服务商面板执行「重置订阅链接（Reset Token）」，后续改用<a href="/clash/sub-store-local-deployment/" class="text-brand-primary underline">本地 Docker 运行 Sub-Store</a> 处理。</li>
+          </ul>
+        </section>
+
+        <!-- H2 #5: Technical Principles -->
+        <section id="technical-principles" class="scroll-mt-24 space-y-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            五、直接影响判断的核心技术原理（协议、线路与分流）
+          </h2>
+          <p class="text-base text-text-body leading-relaxed">
+            了解底层技术并不需要成为网络工程师，但弄清以下四个直接影响选型和排障结果的核心机制，能让你立刻看透宣传话术、避免在错误方向上反复踩坑。
+          </p>
+
+          <h3 id="protocol-behavior" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            1. 为什么同一网络下，Shadowsocks、VLESS-Reality 与 Hysteria 2 表现完全不同？
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            在公开免费节点中，大量历史存留节点仍在使用传统裸奔式 <strong>Shadowsocks (SS)</strong> 或老旧 <strong>VMess</strong>。在没有国内中转机房护航的公网直连条件下，传统 SS 的流量特征极易被骨干网关识别并主动丢包重置；而新一代 <strong>VLESS-XTLS-Vision-Reality</strong> 直接复用真实海外大站点的 TLS 证书公钥进行伪装，抗主动探测能力极强，这也是当前老旧停更客户端（如 Clash for Windows）彻底落后、必须迁移到基于 <strong>Mihomo（Clash.Meta）内核的 Clash Verge Rev</strong> 的核心原因。
+          </p>
+          <p class="text-base text-text-body leading-relaxed">
+            此外，如果你使用的是校园网或移动宽带等晚高峰丢包严重的网络，基于 QUIC / UDP 的 <strong>Hysteria 2</strong> 协议能在 5%–15% 丢包环境下依然抢出高吞吐带宽；但反过来，如果某些高校防火墙直接对持续大流量 UDP 单端口执行了 QoS 封死或限速，Hysteria 2 反而会彻底超时，此时切回基于 TCP 的 VLESS-Reality 或 Trojan 才是正解（可进一步对照<a href="/comparisons/vless-trojan-hysteria2-comparison/" class="text-brand-primary underline">VLESS-Reality、Trojan 与 Hysteria 2 协议横向对比</a>与<a href="/resources/hysteria2-campus-network-tuning/" class="text-brand-primary underline">校园网 Hysteria 2 调优指南</a>）。
+          </p>
+
+          <h3 id="ping-vs-http-truth" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            2. 为什么测速面板显示绿色低延迟，实际网页依然打不开？
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            这是测试公开免费节点或廉价节点时最容易困惑的假象。原因在于不同测速方式探测的协议层级完全不同：
+          </p>
+          <ul class="list-disc pl-6 space-y-1.5 text-base text-text-body leading-relaxed">
+            <li><strong>ICMP Ping 与 TCP Ping 仅测「到达中转入口的物理响应」：</strong>如果你测出来的 30ms 只是本地到国内中转入口机房的 TCP 握手耗时，哪怕后面那段跨海专线或海外落地服务器已经彻底宕机，入口依然可能返回漂亮的数字。</li>
+            <li><strong>URLTest（HTTP 204 测试）才真正走完整个隧道：</strong>Clash Verge Rev 内置测速默认向 <code>gstatic.com/generate_204</code> 发起完整 HTTP 探测。只有拿到 <code>204</code> 状态码才证明整条链路贯通；如果出现绿字但浏览器仍打不开网页，通常是<strong>浏览器自带安全 DNS（DoH）绕过了代理规则</strong>，或是<strong>节点不支持并发大包且存在严重丢包</strong>。</li>
+            <li><strong>公网直连 vs BGP 中转 vs IEPL 专线：</strong>免费节点绝大部分属于「本地宽带直连海外廉价 VPS」。哪怕那台海外机房标称 10Gbps 带宽，只要跨境海底光缆出口在晚上 21:00 发生国际拥堵，你的数据依然卡在出境口排队丢包。而商业付费服务中的 <strong>BGP 中转</strong> 会先通过国内三网优化入口机房接力，<strong>IEPL / IPLC 跨境内网专线</strong>则更进一步通过运营商点对点内网通道直接过境，绕开公网拥堵段与常规 QoS 限流，因此能够维持较低的延迟抖动（深入技术差异见<a href="/comparisons/iepl-vs-bgp-transit/" class="text-brand-primary underline">IEPL 专线 vs 公网 BGP 中转对比</a>）。</li>
+          </ul>
+
+          <h3 id="routing-and-billing" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            3. Fake-IP、TUN 模式、倍率与「年付折算」文字游戏
+          </h3>
+          <ul class="list-disc pl-6 space-y-2 text-base text-text-body leading-relaxed">
+            <li><strong>保持「规则模式（Rule）」而非「全局模式（Global）」：</strong>在规则模式下，国内站点（淘宝、微信、B站、国内网盘）全部走 <code>DIRECT</code> 本地直连，既最快也不消耗任何海外节点额度；误开全局模式会把国内高清视频与系统更新全部绕到海外再传回，几小时就能耗光 50GB 小额套餐（详见<a href="/clash/rule-vs-global-mode/" class="text-brand-primary underline">规则模式与全局模式区别实战</a>）。</li>
+            <li><strong>何时才需要开启 TUN 模式：</strong>系统代理仅接管遵守 HTTP 代理变量的浏览器，命令行终端（<code>git</code> / <code>npm</code> / <code>curl</code>）、Docker、微软商店 UWP 应用与游戏往往不走系统代理。只有需要让这些底层进程走代理时才需安装 Service Mode 开启 TUN（见<a href="/clash/tun-mode-udp-guide/" class="text-brand-primary underline">Clash Verge TUN 模式开启教程</a>）。</li>
+            <li><strong>认清节点倍率（<code>1x</code> vs <code>2x</code>）与审计规则：</strong>如果某高倍率节点标注 <code>2x</code>，实际跑 10GB 流量会从额度中扣掉 20GB；而开启代理挂着迅雷或 qBittorrent 下载 BT 种子，不仅白白烧光流量，还会直接触发机场服务端审计规则导致封号（参考<a href="/resources/airport-audit-rules-explained/" class="text-brand-primary underline">机场审计规则全解析</a>）。</li>
+            <li><strong>警惕「¥5.6/月」同质化年付诱饵：</strong>根据本站对 32 个品牌档案的交叉审计，市场上标注 ¥5.6/月（大佬云、闪电鼠、云界线、榴莲云、环球梯）不仅需要按年一次性支付约 ¥67.2，且 5 家在核心规格上高度雷同（其中榴莲云未明确标注协议、云界线与环球梯链接存在格式差异），缺乏独立测速档案，仅适合作可承受损失的极低预算备胎（详见<a href="/comparisons/cheap-annual-airports-audit/" class="text-brand-primary underline">5.6–8 元年付档审计</a>与<a href="/resources/airport-billing-faq/" class="text-brand-primary underline">机场计费规则 FAQ</a>）。</li>
+          </ul>
+        </section>
+
+        <!-- H2 #6: Decision Matrix by Scenario -->
+        <section id="decision-branches" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            六、按场景、预算与风险承受能力的五条决策分支
+          </h2>
+          <p class="text-base text-text-body leading-relaxed">
+            不要试图用一个方案覆盖所有需求。根据你当前的实际使用频率、预算上限、设备平台以及是否涉及高价值账号，按照下面五条清晰路径对号入座，可以省去绝大部分试错成本。
+          </p>
+
+          <div class="space-y-4">
+            {DECISION_BRANCHES.map((branch, idx) => (
+              <div class="rounded-2xl border border-border-subtle bg-white p-5 sm:p-6 space-y-3 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="font-mono text-xs font-bold text-brand-primary">分支 0{idx + 1}</span>
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-bg-surface border border-border-subtle text-text-title">
+                    参考预算：{branch.budget}
+                  </span>
+                </div>
+                <h3 class="text-base sm:text-lg font-bold text-text-title">场景：{branch.scenario}</h3>
+                <p class="text-sm text-text-body leading-relaxed">
+                  <strong class="text-emerald-800">推荐路径：</strong>{branch.recommendedPath}
+                </p>
+                <p class="text-sm text-rose-900 bg-rose-50/50 rounded-xl p-3 border border-rose-200/80 leading-relaxed">
+                  <strong>避坑提示：</strong>{branch.avoidAction}
+                </p>
+                <div class="pt-1">
+                  <a href={branch.nextHref} class="text-xs sm:text-sm font-semibold text-brand-primary hover:underline">
+                    下一步：{branch.nextLabel} →
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- H2 #7: Verifiable Action & Alternative Cards (Partition A compliant: routes internally to Download Guides, Reviews & Brand Archives) -->
+        <section id="low-cost-alternatives" class="scroll-mt-24 space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            七、可核实的获取客户端与低门槛替代入口（含完整数据披露）
+          </h2>
+          <p class="text-base text-text-body leading-relaxed">
+            遵循本站「教程与资源区不直接弹出外部注册购买链接」的架构规范，本节先提供官方开源客户端获取入口，随后汇总经本地品牌数据库核实、提供低门槛月付或一次性不限时流量包的代表档案入口。如需了解具体官网注册通道与优惠码限制，请点击对应卡片的「查看套餐」进入独立品牌档案页核对后自行决策。<strong>购买前请务必注意：</strong>（1）多数品牌无免费试用，部分特价/永久包不支持退款；（2）年付折算月均价不等于按月单独结算价格；（3）若需用于 Clash Verge Rev 或软路由，请选择保留第三方订阅的品牌。
+          </p>
+
+          <!-- Free Open-Source Client Acquisition Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="rounded-2xl border border-blue-200 bg-blue-50/40 p-4 flex flex-col justify-between gap-3">
+              <div class="space-y-1.5">
+                <span class="text-[11px] font-mono text-brand-primary font-semibold">桌面端开源客户端 · ¥0</span>
+                <h3 class="text-base font-bold text-text-title">Clash Verge Rev</h3>
+                <p class="text-xs text-text-body leading-relaxed">
+                  适用：Windows / macOS / Linux。内置 Mihomo 内核，支持覆写与 TUN。限制：不含内置节点，需核对 SHA256。
+                </p>
+              </div>
+              <a
+                href="/clash/verge-official-download-guide/"
+                class="px-3.5 py-2 rounded-xl bg-brand-primary text-white text-xs font-semibold text-center hover:bg-brand-primary-hover transition-colors"
+              >
+                获取客户端
+              </a>
+            </div>
+
+            <div class="rounded-2xl border border-blue-200 bg-blue-50/40 p-4 flex flex-col justify-between gap-3">
+              <div class="space-y-1.5">
+                <span class="text-[11px] font-mono text-brand-primary font-semibold">Android 开源客户端 · ¥0</span>
+                <h3 class="text-base font-bold text-text-title">FlClash / v2rayNG</h3>
+                <p class="text-xs text-text-body leading-relaxed">
+                  适用：Android 手机平板。免费开源且支持分应用代理。限制：严禁在 Play 商店下载第三方控制的 NekoBox。
+                </p>
+              </div>
+              <a
+                href="/guides/android-proxy-clients-guide/"
+                class="px-3.5 py-2 rounded-xl bg-brand-primary text-white text-xs font-semibold text-center hover:bg-brand-primary-hover transition-colors"
+              >
+                获取客户端
+              </a>
+            </div>
+
+            <div class="rounded-2xl border border-blue-200 bg-blue-50/40 p-4 flex flex-col justify-between gap-3">
+              <div class="space-y-1.5">
+                <span class="text-[11px] font-mono text-brand-primary font-semibold">iOS 客户端选型 · ¥0 起</span>
+                <h3 class="text-base font-bold text-text-title">Karing / Shadowrocket</h3>
+                <p class="text-xs text-text-body leading-relaxed">
+                  适用：iPhone / iPad。Karing / Clash Mi 免费（视区服），小火箭约 $2.99。限制：需外区 App Store 账号。
+                </p>
+              </div>
+              <a
+                href="/guides/ios-proxy-clients-guide/"
+                class="px-3.5 py-2 rounded-xl bg-brand-primary text-white text-xs font-semibold text-center hover:bg-brand-primary-hover transition-colors"
+              >
+                获取客户端
+              </a>
+            </div>
+          </div>
+
+          <AffiliateDisclosure
+            extraNote="以下替代方案卡片仅提供站内档案与独立评测入口（最后核实：2026-10-19），点击「查看套餐」进入商业档案页后方可见已披露的官方注册通道。"
+          />
+
+          <h3 id="cost-break-even" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            长期总支出对比：免费时间损耗 vs 不限时流量包 vs 包月 / 年付小包
+          </h3>
+          <p class="text-base text-text-body leading-relaxed">
+            很多用户迟迟停留在寻找「免费节点」的循环里，往往是因为没有算过一笔直观的<strong>流量消耗盈亏账</strong>。按照正常图文查资料、使用 ChatGPT/Claude 对话以及同步开发代码计算，每小时海外纯文本与 API 通信仅消耗约 <code>10MB–30MB</code> 流量；即便每天稳定办公两小时，全月实际海外流量也往往不到 <code>5GB–10GB</code>。只有观看 1080P/4K 流媒体视频或拉取大型容器镜像，流量才会跃升至每月 <code>80GB–150GB</code> 以上。
+          </p>
+          <p class="text-base text-text-body leading-relaxed">
+            对照这组实际用量，我们可以得出非常明确的财务分界线：如果你的月均海外流量低于 <code>15GB</code>，去买 ¥20/月的包月套餐意味着月底浪费 90% 流量，而每次去搜免费节点又要忍受半小时找链接排障与账号风控；此时花 <strong>¥99–¥147 一次买断 <code>100GB–247GB</code> 永久不限时包</strong>，通常可以安稳使用 <strong>8 个月至 2 年</strong>，平摊每天成本仅 ¥0.2–¥0.4。反之，一旦你每天都会看高清海外视频或重度工作超过 40GB/月，则直接选择支持按月结算的 <strong>¥19.9–¥25/月</strong> 标准专线套餐单 GB 成本最低（低至 <code>¥0.13–¥0.15/GB</code>），且无需一次性承担整年预付资金风险。
+          </p>
+
+          <h3 id="pre-order-checklist" class="text-lg font-bold text-text-title pt-2 scroll-mt-24">
+            下单任何替代方案前必查的四项条款
+          </h3>
+          <ol class="list-decimal pl-6 space-y-1.5 text-sm sm:text-base text-text-body leading-relaxed">
+            <li><strong>核对退款与试用边界：</strong>几乎所有 IEPL 专线品牌均不开放无门槛免费试用，且如光速云的致敬斯诺克 147 永久版、轻量年付版以及一翻云等品牌的特殊优惠商品均明确不退不换，因此首次尝试某个新品牌时应优先用单月月付探路。</li>
+            <li><strong>核对优惠码适用范围：</strong>部分折扣码（例如 Firefly 的 <code>firefly</code> 8 折码、闪跃的 <code>shanyue</code> 8 折码、灵猫的 <code>lingmao</code> 8 折码以及光速云 147/99 套餐）均明确排除了入门年付小包或特殊款，下单前应在结算页确认实付金额是否发生扣减。</li>
+            <li><strong>核对客户端兼容与多设备并发规则：</strong>若计划在软路由（OpenWrt）或 Clash Verge Rev 使用，必须避开「仅专属客户端（无通用订阅）」的服务商；虽多数品牌标称不限设备数，仍严禁将私人订阅分享至公开群聊，以免多地异地 IP 触发风控封号。</li>
+            <li><strong>核对最近核实时间与历史口径差异：</strong>部分品牌历史文档与当前官网在流量额度或优惠码上可能随版本调整（例如光速云轻量版历史文本分别出现过 59GB 与 69GB 两种口径），本站档案已如实保留差异提示，实际付款前请以服务商实时面板展示为准。</li>
+          </ol>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {altBrands.map((brand) => {
+              const onetimePlan = brand.plans.find((p) => p.billingCycle === '一次性付费');
+              const monthlyPlan = brand.plans.find((p) => p.billingCycle === '月付');
+              const annualPlan = brand.plans.find((p) => p.billingCycle === '年付');
+
+              return (
+                <article class="rounded-2xl border border-border-subtle bg-white p-5 flex flex-col justify-between gap-4 shadow-sm">
+                  <div class="space-y-3">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="flex items-center gap-3 min-w-0">
+                        {brand.logo ? (
+                          <img
+                            src={brand.logo}
+                            alt={`${brand.name} 品牌图标`}
+                            width="40"
+                            height="40"
+                            loading="lazy"
+                            class="w-10 h-10 rounded-xl object-contain bg-bg-surface border border-border-subtle p-1 shrink-0"
+                          />
+                        ) : (
+                          <div
+                            class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
+                            style={`background-color: ${brand.accentColor}`}
+                          >
+                            {brand.name.slice(0, 2)}
+                          </div>
+                        )}
+                        <div class="min-w-0">
+                          <h3 class="text-base font-bold text-text-title truncate">
+                            <a href={`/brands/${brand.slug}/`} class="hover:text-brand-primary">
+                              {brand.name}（{brand.englishName}）
+                            </a>
+                          </h3>
+                          <p class="text-xs text-text-muted truncate">
+                            {brand.sinceYear ? `${brand.sinceYear} 年起运营 · ` : ''}{brand.lineType}
+                          </p>
+                        </div>
+                      </div>
+                      <span class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-bg-surface border border-border-subtle text-text-muted shrink-0">
+                        核实 {brand.verifiedAt}
+                      </span>
+                    </div>
+
+                    <div class="rounded-xl bg-bg-surface border border-border-subtle p-3 text-xs space-y-1.5">
+                      <div>
+                        <span class="text-text-muted">适合人群：</span>
+                        <span class="text-text-title font-medium">{brand.suitableFor[0]}</span>
+                      </div>
+                      {onetimePlan && (
+                        <div>
+                          <span class="text-text-muted">不限时包：</span>
+                          <span class="font-semibold text-text-title">
+                            {onetimePlan.name} ¥{onetimePlan.priceCny}（{onetimePlan.trafficDisplay}）
+                          </span>
+                        </div>
+                      )}
+                      {monthlyPlan && (
+                        <div>
+                          <span class="text-text-muted">真实月付：</span>
+                          <span class="font-semibold text-text-title">
+                            {monthlyPlan.name} ¥{monthlyPlan.priceCny}/月（{monthlyPlan.trafficDisplay}）
+                          </span>
+                        </div>
+                      )}
+                      {annualPlan && (
+                        <div>
+                          <span class="text-text-muted">年付小包：</span>
+                          <span class="text-text-body">
+                            {annualPlan.name} ¥{annualPlan.priceCny}/年（折合 ¥{(annualPlan.priceCny / 12).toFixed(2)}/月，{annualPlan.trafficDisplay}）
+                          </span>
+                        </div>
+                      )}
+                      <div>
+                        <span class="text-text-muted">客户端：</span>
+                        <span class="text-text-body">{brand.clientMode}</span>
+                      </div>
+                    </div>
+
+                    <p class="text-xs text-amber-900 leading-relaxed">
+                      <strong>主要限制：</strong>{brand.cons[0]}
+                    </p>
+                  </div>
+
+                  <div class="flex flex-wrap gap-2.5 pt-3 border-t border-border-subtle text-xs">
+                    <a
+                      href={`/brands/${brand.slug}/`}
+                      class="flex-1 text-center px-3.5 py-2.5 rounded-xl bg-brand-primary text-white font-semibold hover:bg-brand-primary-hover transition-colors"
+                    >
+                      查看套餐
+                    </a>
+                    {brand.reviewSlug && (
+                      <a
+                        href={`/reviews/${brand.reviewSlug}/`}
+                        class="flex-1 text-center px-3.5 py-2.5 rounded-xl bg-white border border-border-subtle font-semibold text-text-title hover:border-brand-primary hover:text-brand-primary transition-colors"
+                      >
+                        了解详情
+                      </a>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <!-- H2 #8: Boundary FAQs -->
+        <section id="faq" class="scroll-mt-24 space-y-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            八、免费节点与替代选择高频边界问题 FAQ（10 问）
+          </h2>
+          <div class="space-y-3">
+            {FREE_NODES_FAQS.map((faq) => (
+              <details class="group rounded-2xl border border-border-subtle bg-white p-4 sm:p-5">
+                <summary class="font-semibold text-text-title cursor-pointer flex items-center justify-between gap-3 list-none text-sm sm:text-base">
+                  <span>{faq.question}</span>
+                  <svg class="w-4 h-4 text-text-muted shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                  </svg>
+                </summary>
+                <div class="mt-3 text-sm text-text-body leading-relaxed space-y-2">
+                  <p>{faq.answer}</p>
+                  {faq.anchorHref && faq.anchorLabel && (
+                    <p>
+                      <a href={faq.anchorHref} class="text-xs font-semibold text-brand-primary hover:underline">
+                        对应章节：{faq.anchorLabel} ↑
+                      </a>
+                    </p>
+                  )}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        <!-- H2 #9: Internal Links & Topic Clusters -->
+        <section id="related-clusters" class="scroll-mt-24 space-y-4" data-pagefind-ignore>
+          <h2 class="text-xl sm:text-2xl font-bold text-text-title pb-2.5 border-b border-border-subtle">
+            九、站内主题聚类与延伸学习导航
+          </h2>
+          <p class="text-sm text-text-body leading-relaxed">
+            本专题已完整回答免费节点的来源、安全性、检测步骤与替代选型问题。下方关联了本站既有的相关深度教程、横向对比与风控档案，按你接下来最需要解决的具体问题点击延伸：
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {FREE_NODES_INTERNAL_LINKS.map((item) => (
+              <a
+                href={item.href}
+                class="card-elevated p-4 flex flex-col justify-between gap-2 group"
+              >
+                <div>
+                  <h3 class="text-sm font-bold text-text-title group-hover:text-brand-primary transition-colors">
+                    {item.title}
+                  </h3>
+                  <p class="text-xs text-text-muted mt-1 leading-relaxed">{item.purpose}</p>
+                </div>
+                <span class="text-xs font-semibold text-brand-primary">阅读该页面 →</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      </article>
+
+      <!-- Desktop Sticky Sidebar TOC & Quick Navigation -->
+      <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-24" data-pagefind-ignore>
+        <TableOfContents headings={headings} />
+
+        <div class="rounded-2xl border border-border-subtle bg-bg-surface p-5 space-y-3 text-xs">
+          <h2 class="text-sm font-bold text-text-title">快速选型工具入口</h2>
+          <p class="text-text-body leading-relaxed">
+            对比 32 个已审计品牌档案的月付价格、线路架构、第三方订阅兼容与不限时套餐明细：
+          </p>
+          <div class="flex flex-col gap-2">
+            <a
+              href="/brands/"
+              class="px-4 py-2.5 rounded-xl bg-brand-primary text-white font-semibold text-center hover:bg-brand-primary-hover transition-colors"
+            >
+              打开 32 家品牌筛选数据库
+            </a>
+            <a
+              href="/offers/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              查看不限时流量包与优惠汇总
+            </a>
+            <a
+              href="/clash/verge-official-download-guide/"
+              class="px-4 py-2.5 rounded-xl bg-white border border-border-subtle text-text-title font-semibold text-center hover:border-brand-primary transition-colors"
+            >
+              获取 Clash Verge Rev 官方正版
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

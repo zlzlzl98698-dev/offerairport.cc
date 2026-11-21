@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/common/Breadcrumbs.astro';
+import FaqAccordion from '../components/common/FaqAccordion.astro';
+import { SITE_CONFIG } from '../data/site';
+import { buildBreadcrumbSchema, buildCanonicalUrl, buildFaqSchema, type FAQItem } from '../utils/seo';
+
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: '评测方法与数据核实规范', href: '/methodology/' },
+];
+
+const methodologyFaqs: FAQItem[] = [
+  {
+    question: '为什么不拿 2026-08-11 批测速图直接按峰值速度排出「全网第 1 到第 32 名」？',
+    answer:
+      '严格遵循原始测试样本说明：同批次各品牌的测试时间戳跨度从凌晨 00:21 到晚间 22:46，且测试工具（如 `MAI-TEST-BOT` 与部分采用喵速 4.7.0 / VLESS 界面）及测试时段拥堵底噪并不完全对齐；直接排绝对总榜属于统计学误导。',
+  },
+  {
+    question: '测速图里看到某个节点速率为 `0B/s` 或超长延迟，为什么不删掉再展示？',
+    answer:
+      '真实稳定性不等于最高单节点峰值。删掉失败节点只保留全绿曲线会严重误导读者对服务商维护质量的判断，因此本站完整保留含 `0B` 在内的原始快照统计，协助用户理性衡量平均水平。',
+  },
+  {
+    question: '站内标注的「Brand / 品牌资料」和「Measured / 实测快照」有什么区别？',
+    answer:
+      '标注「品牌资料（Vendor）」的数据仅代表服务商公开文案或客服资料申报（例如标称 `2.5Gbps` 端口或支持某某协议），尚未经历或未在全周期重新逐一测通；标注「实测快照（Measured）」的则具备明确日期、精确到秒的时间戳与独立截图档案支撑。',
+  },
+];
+
+const schemas = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: `独立评测方法与数据溯源规范 | ${SITE_CONFIG.name}`,
+    url: buildCanonicalUrl('/methodology/'),
+    inLanguage: 'zh-CN',
+  },
+  buildFaqSchema(methodologyFaqs),
+];
+---
+
+<BaseLayout
+  title="独立评测方法论、测速基准与数据溯源规范"
+  description="公开机场优选的 2026 评测与品牌核验标准：珠海测试节点条件、晚高峰时间窗口定义、月付实价与年付折算规则、以及原始数据缺口的如实披露方式。"
+  canonicalUrl="/methodology/"
+  structuredData={schemas}
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mb-8 pb-6 border-b border-border-subtle space-y-4">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        Methodology · 可核实的数据与审计规范
+      </span>
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-text-title leading-tight">
+        独立评测方法论与数据核实边界
+      </h1>
+      <div class="rounded-2xl bg-bg-surface border border-border-subtle p-5 text-sm sm:text-base text-text-body leading-relaxed">
+        <strong class="text-text-title">核心承诺：</strong>
+        每一条测速数字均注明采集时间窗口与机房测试端，每一项套餐费用均拆分「真实单月付」与「年付折算均价」，资料缺失字段直接标明「待核实」，拒绝为商业转化虚构任何分数或全胜结论。
+      </div>
+    </header>
+
+    <div class="editorial-prose space-y-8">
+      <section>
+        <h2>一、测速样本的四个强制元数据维度</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>核查维度</th>
+              <th>记录规范</th>
+              <th>常见误读提示</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>精确北京时间 (CST)</strong></td>
+              <td>保留至秒（如 `2026-08-11 22:46:xx` vs `00:21:xx`）</td>
+              <td>20:00–23:00 晚高峰成绩与凌晨闲时不可混为一谈；非晚高峰样本显式标明局限</td>
+            </tr>
+            <tr>
+              <td><strong>测试服务器与线程数</strong></td>
+              <td>注明如珠海联通 5Gbps / 9Gbps 后端与 `32` 线程数</td>
+              <td>机房多线程峰值用于摸排通道理论天花板，不等于普通用户家宽单线程打开网页体感</td>
+            </tr>
+            <tr>
+              <td><strong>全节点均值与 `0B` 失败率</strong></td>
+              <td>原样呈现均值、最高峰值及 `0B/s` 超时样本</td>
+              <td>单一节点拉高不代表全部地区稳定，须结合平均速率与不可用比例交叉评估</td>
+            </tr>
+            <tr>
+              <td><strong>RTT vs HTTPS 延迟与 UDP</strong></td>
+              <td>拆分入口握手延迟、真实网页 HTTP 返回时间及 NAT 类型</td>
+              <td>入口低延迟不代表海外落地快，需综合 AI 与流媒体实际无痕浏览器验证</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>二、价格审计与文字游戏过滤规则</h2>
+        <ol>
+          <li><strong>月付实价与年付折算严格分列</strong>：凡需一次性支付全年费用（如 ¥67.2/年、¥89/年、¥99/年）但标题写成「¥5.6–¥8.25/月」的套餐，数据库强制标注 `isMonthlyAmortized: true`（年付折算），避免新手误以为能花 8 块钱单买一个月。</li>
+          <li><strong>倍率算术与退款限制明示</strong>：同步列出常规节点倍率（如 `1x`）与特殊商品排除折扣码/不退款条款（如光速云 `147` 永久/99 轻量版、部分品牌 `8 折码` 不适用特价款等明确记录）。</li>
+          <li><strong>交叉验证内部数据矛盾</strong>：当同一份原始品牌文件中出现口径差异（如首页摘要曾记 `59GB/月` 而明细表记为 `69GB/月`），采用原文高亮对比备注，不私自篡改单边数据。</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>三、关于缺失字段的处理原则（Zero-Fabrication）</h2>
+        <p>
+          面对本地归档资料不完整的品牌（例如仅有 2026-08-11 VLESS 测速截图但缺价格表的<strong>快狸</strong>、以及缺乏近期复测或多周期报价的<strong>宇宙云、灵动云、浪网、EdgeNova</strong> 等），本站绝不按“行业行情”推算补写假套餐或虚构返佣外链，一律划归 <code>partial</code> 或 <code>historical</code> 透明状态留白等待后续补证。
+        </p>
+      </section>
+    </div>
+
+    <FaqAccordion title="评测规范常见疑问" faqs={methodologyFaqs} />
+  </div>
+</BaseLayout>

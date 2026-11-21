@@ -1,0 +1,29 @@
+---
+import { SITE_CONFIG } from '../../data/site';
+
+interface Props {
+  compact?: boolean;
+  extraNote?: string;
+}
+
+const { compact = false, extraNote } = Astro.props;
+---
+
+<div
+  class={`rounded-xl border border-amber-200 bg-amber-50/70 text-amber-950 ${
+    compact ? 'px-3.5 py-2.5 text-xs' : 'p-4 sm:p-5 text-sm'
+  }`}
+  role="note"
+  aria-label="商业合作与评测独立性披露"
+>
+  <div class="flex items-start gap-2.5">
+    <svg class="w-4 h-4 text-amber-700 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+    </svg>
+    <div class="space-y-1 leading-relaxed">
+      <p class="font-semibold text-amber-950">商业关系与数据来源披露</p>
+      <p>{SITE_CONFIG.affiliateDisclosureText}</p>
+      {extraNote && <p class="text-amber-900">{extraNote}</p>}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,56 @@
+---
+import type { BrandRecord } from '../../data/brands/types';
+
+interface Props {
+  brands: BrandRecord[];
+  title?: string;
+}
+
+const { brands, title = '机场品牌核心参数横向对比' } = Astro.props;
+---
+
+<div class="rounded-2xl border border-border-subtle bg-white overflow-hidden my-6">
+  <div class="px-5 py-3.5 bg-bg-surface border-b border-border-subtle flex items-center justify-between">
+    <h3 class="text-base font-bold text-text-title">{title}</h3>
+    <span class="text-xs text-text-muted">数据统一源自品牌数据库</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse text-sm">
+      <thead>
+        <tr class="bg-bg-surface/60 border-b border-border-subtle text-xs text-text-muted">
+          <th class="py-3 px-4 font-semibold">品牌</th>
+          <th class="py-3 px-4 font-semibold">起始门槛（区分年付/月付）</th>
+          <th class="py-3 px-4 font-semibold">线路与协议</th>
+          <th class="py-3 px-4 font-semibold">客户端模式</th>
+          <th class="py-3 px-4 font-semibold">不限时包</th>
+          <th class="py-3 px-4 font-semibold">核实状态</th>
+          <th class="py-3 px-4 font-semibold">档案</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-border-subtle">
+        {brands.map((b) => (
+          <tr class="hover:bg-bg-surface/40">
+            <td class="py-3 px-4 font-semibold text-text-title whitespace-nowrap">
+              <a href={`/brands/${b.slug}/`} class="hover:text-brand-primary">
+                {b.name}
+              </a>
+            </td>
+            <td class="py-3 px-4 text-text-body">{b.startingMonthlyDisplay}</td>
+            <td class="py-3 px-4 text-text-body">
+              <div>{b.lineType}</div>
+              <div class="text-xs text-text-muted">{b.protocols.join(' / ')}</div>
+            </td>
+            <td class="py-3 px-4 text-text-body">{b.clientMode}</td>
+            <td class="py-3 px-4 whitespace-nowrap">{b.hasOnetimePlan ? '支持' : '无记录'}</td>
+            <td class="py-3 px-4 font-mono text-xs text-text-muted whitespace-nowrap">{b.verifiedAt}</td>
+            <td class="py-3 px-4 whitespace-nowrap">
+              <a href={`/brands/${b.slug}/`} class="text-xs font-medium text-brand-primary hover:underline">
+                详情
+              </a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,62 @@
+---
+import { getL2SubtopicGuide } from '../../data/l2-subtopic-index';
+
+interface Props {
+  guideKey: string;
+}
+
+const { guideKey } = Astro.props;
+const guide = getL2SubtopicGuide(guideKey);
+---
+
+{guide && (
+  <section class="rounded-3xl border border-border-subtle bg-white p-6 sm:p-8 space-y-6">
+    <div class="space-y-2">
+      <h2 class="text-xl sm:text-2xl font-bold text-text-title">{guide.heading}</h2>
+      <p class="text-sm sm:text-base text-text-body leading-relaxed">{guide.intro}</p>
+    </div>
+
+    <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+      <div class="px-4 py-3 bg-bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
+        <span class="text-sm font-bold text-text-title">{guide.tableTitle}</span>
+        <span class="text-xs text-text-muted sm:hidden">左右滑动查看完整列 →</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[580px] lg:min-w-0 text-left border-collapse text-xs sm:text-[13px]">
+          <thead>
+            <tr class="bg-bg-surface/70 border-b border-border-subtle text-text-title">
+              <th class="p-3 sm:p-3.5 font-bold w-[22%]">{guide.headers[0]}</th>
+              <th class="p-3 sm:p-3.5 font-bold w-[26%]">{guide.headers[1]}</th>
+              <th class="p-3 sm:p-3.5 font-bold w-[24%]">{guide.headers[2]}</th>
+              <th class="p-3 sm:p-3.5 font-bold w-[28%]">{guide.headers[3]}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-subtle text-text-body">
+            {guide.rows.map((r) => (
+              <tr class="hover:bg-slate-50/70 align-top">
+                <td class="p-3 sm:p-3.5 font-bold text-text-title leading-relaxed">{r.col1}</td>
+                <td class="p-3 sm:p-3.5 leading-relaxed">{r.col2}</td>
+                <td class="p-3 sm:p-3.5 leading-relaxed font-medium text-text-title">{r.col3}</td>
+                <td class="p-3 sm:p-3.5 leading-relaxed">{r.col4}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="rounded-2xl bg-bg-surface border border-border-subtle p-5 space-y-2.5">
+      <h3 class="text-base font-bold text-text-title">{guide.checkpointsTitle}</h3>
+      <ul class="space-y-1.5 text-sm text-text-body leading-relaxed list-disc pl-5">
+        {guide.checkpoints.map((c) => (
+          <li>{c}</li>
+        ))}
+      </ul>
+      <p class="pt-1 text-xs">
+        <a href={guide.parentHubHref} class="font-semibold text-brand-primary hover:underline">
+          {guide.parentHubLabel} →
+        </a>
+      </p>
+    </div>
+  </section>
+)}

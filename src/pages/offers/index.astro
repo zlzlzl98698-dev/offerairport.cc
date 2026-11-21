@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import AffiliateDisclosure from '../../components/commercial/AffiliateDisclosure.astro';
+import OfferCard from '../../components/commercial/OfferCard.astro';
+import FaqAccordion from '../../components/common/FaqAccordion.astro';
+import { ALL_BRANDS } from '../../data/brands';
+import { buildBreadcrumbSchema, buildCanonicalUrl, buildFaqSchema, type FAQItem } from '../../utils/seo';
+
+const breadcrumbs = [
+  { name: '首页', href: '/' },
+  { name: '套餐与优惠汇总', href: '/offers/' },
+];
+
+const brandsWithPromo = ALL_BRANDS.filter((b) => Boolean(b.promoCode));
+const onetimeBrands = ALL_BRANDS.filter((b) => b.hasOnetimePlan);
+
+const offersFaqs: FAQItem[] = [
+  {
+    question: '为什么有些特价或年付小包输入优惠码后总价没有任何折扣变化？',
+    answer:
+      '本站多款归档品牌（例如 Firefly `firefly`、闪跃 `shanyue`、灵猫 `lingmao` 8 折码以及光速云 `147 永久/99 轻量版` 等）在原始资料中已明示特定低价年付或永久按量套餐不可叠加使用优惠码，具体以结算页最终实付价格为准。',
+  },
+  {
+    question: '一次性不限时流量包适合作为日常看 4K 视频的主力套餐吗？',
+    answer:
+      '通常不划算。不限时流量包的单 GB 折算成本一般明显高于包月套餐，更推荐用于每月消耗 15GB 以内的低频查资料用户，或者配合 [双机场主备故障转移方案](/guides/multi-airport-failover-strategy/) 放在备用顺位作断流兜底。',
+  },
+  {
+    question: '特价套餐买错节点或不适合当地宽带能申请全额退款吗？',
+    answer:
+      '大多数服务商协议明确约定年付特价款、不限时包与已使用流量的账号不支持退款。新手务必先通过可月付的常规方案测试当地宽带晚高峰连通后再做长周期决策。',
+  },
+];
+
+const title = '机场优惠码与套餐价格汇总（含不限时流量包整理）';
+const description =
+  '集中整理已核实优惠码、年付折算门槛与支持一次性不限时流量包的机场品牌入口，所有优惠条件均标注适用限制与核实日期。';
+
+const schemas = [
+  buildBreadcrumbSchema(breadcrumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: buildCanonicalUrl('/offers/'),
+  },
+  buildFaqSchema(offersFaqs),
+];
+---
+
+<BaseLayout title={title} description={description} canonicalUrl="/offers/" structuredData={schemas}>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="rounded-3xl bg-bg-surface border border-border-subtle p-6 sm:p-8 mb-6">
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-800 mb-3">
+        商业套餐与优惠专题
+      </span>
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-text-title mb-3">
+        机场优惠码与高性价比套餐汇总
+      </h1>
+      <p class="text-sm sm:text-base text-text-body max-w-3xl leading-relaxed">
+        汇总品牌资料中可核实的优惠码、年付小包及一次性不限时套餐信息。请注意区分「年付折算月均价」与「单月付款价格」，部分特价套餐不参与优惠码折扣。
+      </p>
+    </header>
+
+    <div class="mb-8">
+      <AffiliateDisclosure />
+    </div>
+
+    <!-- Primary Partner Spotlight -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold text-text-title mb-4">重点资料品牌：光速云（含永久 147 套餐与轻量年付）</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <OfferCard
+          brandSlug="guangsuyun"
+          highlightNote="2020 年起运营，IEPL + 企业级内网专线；轻量版 ¥99/年（折合约 ¥8.25/月），致敬斯诺克 147 永久版 ¥147/247GB，极速版月付 ¥25/168GB。优惠码 AMM（特价款不打折）。"
+        />
+        <OfferCard
+          brandSlug="weitu"
+          highlightNote="2023 年运营 IPLC 专线，支持 Clash/小火箭第三方订阅。普通版月付 ¥19.90/150GB，节假日限时款 ¥14.9/100GB，优惠码 weitu666。"
+        />
+      </div>
+    </section>
+
+    <!-- All Verified Promo Codes Table -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold text-text-title mb-4">已登记优惠码与适用说明（共 {brandsWithPromo.length} 家）</h2>
+      <div class="rounded-2xl border border-border-subtle bg-white overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-bg-surface border-b border-border-subtle text-xs text-text-muted">
+                <th class="py-3 px-4 font-semibold">品牌</th>
+                <th class="py-3 px-4 font-semibold">登记优惠码</th>
+                <th class="py-3 px-4 font-semibold">优惠备注与限制</th>
+                <th class="py-3 px-4 font-semibold">入门参考门槛</th>
+                <th class="py-3 px-4 font-semibold">详情与注册</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-subtle">
+              {brandsWithPromo.map((b) => (
+                <tr class="hover:bg-bg-surface/40">
+                  <td class="py-3 px-4 font-semibold text-text-title whitespace-nowrap">
+                    <a href={`/brands/${b.slug}/`} class="hover:text-brand-primary">{b.name}</a>
+                  </td>
+                  <td class="py-3 px-4 font-mono text-brand-primary font-semibold whitespace-nowrap">
+                    {b.promoCode}
+                  </td>
+                  <td class="py-3 px-4 text-xs text-text-body max-w-md">
+                    {b.promoNote || '品牌清单标注有效优惠码，具体折扣以下单结算页为准。'}
+                  </td>
+                  <td class="py-3 px-4 text-xs text-text-body whitespace-nowrap">
+                    {b.startingMonthlyDisplay}
+                  </td>
+                  <td class="py-3 px-4 whitespace-nowrap">
+                    <a href={`/brands/${b.slug}/`} class="text-xs font-semibold text-brand-primary hover:underline">
+                      查看套餐 →
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Onetime Traffic Plans -->
+    <section>
+      <h2 class="text-xl font-bold text-text-title mb-4">支持「一次性不限时流量包」品牌（共 {onetimeBrands.length} 家）</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {onetimeBrands.map((b) => (
+          <OfferCard brandSlug={b.slug} />
+        ))}
+      </div>
+    </section>
+
+    <FaqAccordion title="优惠码适用范围与计费边界 FAQ" faqs={offersFaqs} />
+  </div>
+</BaseLayout>
